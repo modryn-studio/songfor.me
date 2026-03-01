@@ -26,6 +26,9 @@ Also fill in `src/config/site.ts` — replace every `TODO:` placeholder with rea
 - `ogDescription` — 110–160 char OG description, slightly more marketing-forward than the meta description
 - `founder` — from context.md or default to "Luke Hanner"
 - `accent` / `bg` — brand colors from brand.md (hex values)
+- `social.twitter` / `social.twitterHandle` — X/Twitter profile URL and handle (e.g. `@lukehanner`) from the Social Profiles section of context.md
+- `social.github` — GitHub URL from the Social Profiles section of context.md
+- Any other social entries listed in context.md (e.g. `devto`, `shipordie`) — uncomment the corresponding lines in `site.social` and populate them
 
 Do not modify any section without a `<!-- TODO -->` marker.
 Do not add new sections.
