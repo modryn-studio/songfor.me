@@ -24,6 +24,12 @@ Leverage these tools in every project:
 4. **SDKs** - Let users extend your product
 5. **Newest AI Tools** - Stay on the bleeding edge, rebuild when better tools emerge
 
+## Distribution
+- **pSEO is the long game** - Programmatic SEO pages (e.g. "best X for Y", comparison pages) compound over 2–4 months. Plant seeds at launch, harvest later.
+- **Reddit first, X second** - Reddit drives qualified traffic on launch day. X builds founder brand over time. Prioritize Reddit posts in niche subreddits where the target user already complains.
+- **Every product launches on modrynstudio.com** - The studio domain aggregates authority. Individual domains are exceptions (pre-existing brands only).
+- **Build log is distribution** - Every `/log` post is content that can be cross-posted to dev.to, shared on Reddit, and linked from X. The build log IS the content marketing strategy.
+
 ## User Experience
 - **Onboard to value in <2 minutes** - Every second to the "aha moment" matters. Remove all friction.
 - **Create emotional connection** - Success metric: "They miss it when it's gone."

@@ -20,6 +20,18 @@
      Example: - `/dashboard` → Main user dashboard after login -->
 - `/` →
 
+## Monetization
+<!-- How does this product make money? Pick one:
+     - `email-only`        → Free tool, capture emails for future launches (default)
+     - `one-time-payment`  → Pay once, use forever (Stripe Checkout)
+     - `none`              → No email capture, no payment — pure SEO/traffic play -->
+
+## Target Subreddits
+<!-- Subreddits where the target user's pain lives.
+     Used by /social prompt for launch-day distribution.
+     List 2–4. Don't include r/SideProject (always included as founder channel).
+     Example: r/webdev, r/freelance -->
+
 ## Social Profiles
 <!-- Your accounts — used by /init and /launch to populate site.ts social block and footer links.
      twitter/devto/shipordie are universal — already filled in.

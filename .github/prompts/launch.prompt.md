@@ -134,18 +134,30 @@ Report what was created vs already existed.
 
 Report PASS / WARN / MISSING for each.
 
-## Step 2: Launch Day Checklist
+## Step 2: Launch Distribution Playbook
 
-Go through these in order.
+### Day 0 — Prep (before going live)
+1. **Build log post** — Run `/log` from this repo. Opens a PR against modryn-studio-v2. Merge before posting anywhere so links don't 404.
+2. **Update tool entry** — Run `/tool` from this repo. Opens a PR against modryn-studio-v2 to set status to `live`, add URL, screenshot, and launch date. Merge alongside the log PR.
+3. **Social copy** — After both PRs are merged, switch to modryn-studio-v2 and run `/social` with the merged log post. That repo has the voice rules — `/social` must run there, not here.
+4. **Queue content** — Draft your Reddit posts (one per target subreddit from this project's tool JSON `subreddits` field). Don't post yet.
 
-### 1. Build Log — do this first
-Run `/log` from this repo. It opens a PR against modryn-studio-v2. Merge it before posting anywhere so links don't 404.
+### Day 1 — Launch
+Post in this order, 30–60 min apart:
+1. **Reddit niche subreddits** — Post to each subreddit listed in the tool's `subreddits` field. Lead with the user's problem, not the product. "I was frustrated by X, so I built Y." Link to the tool, not the studio.
+2. **Reddit r/SideProject** — Founder channel. Here you can talk about the build process. Link to the log post.
+3. **X/Twitter** — Post with screenshot/GIF attached. Tag relevant accounts if applicable.
+4. **Ship or Die** — Post build update.
 
-### 2. Update tool entry
-Run `/tool` from this repo. It opens a PR against modryn-studio-v2 to set status to `live`, add the URL, screenshot, and launch date. Merge alongside the log PR.
+### Day 2 — Follow-up
+1. **Reply to every Reddit comment** — This drives the algorithm. Genuine replies, not "thanks for the feedback!" spam.
+2. **Dev.to** — Cross-post from RSS feed (auto-drafted, publish manually). Add a canonical URL back to your log post.
+3. **Indie Hackers** — Brief show-and-tell post in the Products section.
 
-### 3. Social copy — run from modryn-studio-v2
-After both PRs are merged, switch to the modryn-studio-v2 repo and run `/social` with the merged log post MDX or tool JSON. That repo holds the voice rules and brand guidelines — `/social` must run there, not here.
+### Week 1 — Compound
+1. **Monitor GA4** — Check which channels drove actual signups/usage, not just pageviews.
+2. **pSEO seed** — If the product has comparison or "best X for Y" potential, create 1–2 programmatic pages. These take 2–4 months to rank but compound. Don't skip this step.
+3. **Hacker News** — Only if you have a genuine technical insight to share (not a product plug). "Show HN" with a paragraph about the interesting technical decision, link to the tool.
 
 ## Step 3: Validation
 Check these are live before posting anywhere:

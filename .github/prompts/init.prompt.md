@@ -34,6 +34,41 @@ Do not modify any section without a `<!-- TODO -->` marker.
 Do not add new sections.
 Do not touch API Route Logging, Analytics, Dev Server, Code Style, or Core Rules.
 
+---
+
+## Wire EmailSignup Component
+
+Check the `Monetization` section of `context.md`.
+
+**If monetization is `email-only` or `one-time-payment`** (or if the section is blank — default to `email-only`):
+- Check if `src/components/email-signup.tsx` exists. It should already be in the boilerplate.
+- Wire it into the home page (`src/app/page.tsx`):
+  - Add `import EmailSignup from '@/components/email-signup'` with the other imports
+  - Add `<EmailSignup />` as a section on the page — typically after the hero/main content area, before the footer
+- The component posts to `/api/feedback` with `type: 'newsletter'` — this route already exists in the boilerplate.
+
+**If monetization is `none`**: skip email signup entirely.
+
+---
+
+## Wire Stripe (Conditional)
+
+Check the `Monetization` section of `context.md`.
+
+**If monetization is `one-time-payment`**:
+1. Install Stripe: run `npm install stripe` in the terminal
+2. Verify `src/app/api/checkout/route.ts` exists (should be in boilerplate). If not, create it using the scaffold pattern.
+3. Verify `src/components/pay-gate.tsx` exists (should be in boilerplate). If not, create it using the scaffold pattern.
+4. Check that `.env.local` has `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, and `STRIPE_PRICE_ID` — if missing, warn the user to fill them in from stripe.com.
+5. Add `paymentGate` analytics event to `src/lib/analytics.ts`:
+   ```ts
+   paymentGate: (action: string) => track('payment_gate', { action }),
+   ```
+
+**If monetization is `email-only` or `none`**: skip Stripe entirely. Do not install the package.
+
+---
+
 Finally, wire `FeedbackWidget` into `src/app/layout.tsx`:
 - Add `import FeedbackWidget from '@/components/feedback-widget'` with the other component imports
 - Add `<FeedbackWidget />` as the last child inside `<body>`, before `</body>`

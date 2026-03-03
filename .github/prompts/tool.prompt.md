@@ -20,12 +20,14 @@ Ask for the following if not already provided:
    - Set `screenshotUrl` = light URL, `screenshotUrlDark` = dark URL (omit `screenshotUrlDark` if no dark variant exists).
 6. **Launched date** — (optional, only if status is `live` or `beta`) ISO date, e.g. `2026-03-01`
 7. **Log slug** — (optional) slug of the `/log` post documenting this build
+8. **Target subreddits** — (optional) 2–4 subreddits where the tool's target users hang out. Used by the `/social` prompt for launch-day distribution. Don't include r/SideProject (always included as founder channel). Example: `["r/webdev", "r/freelance"]`
 
 Then:
 - Derive the slug from the name (lowercase, spaces → hyphens, strip special chars)
 - Check if `content/tools/<slug>.json` already exists on `modryn-studio/modryn-studio-v2` main branch using the GitHub MCP
 - If it exists: update the file with the new values
 - If it does not exist: create it
+- Include `subreddits` as an array in the JSON if provided (e.g. `"subreddits": ["r/webdev", "r/freelance"]`)
 - Use a branch named `tool/<slug>` and open a PR against `main` on `modryn-studio/modryn-studio-v2` with:
   - Title: `tool: add/update <tool name>`
   - Body: the JSON that was written, plus a one-line summary of what changed
