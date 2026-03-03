@@ -20,7 +20,7 @@ Then edit `.github/copilot-instructions.md` and replace every `<!-- TODO -->` se
 
 Also fill in `src/config/site.ts` — replace every `TODO:` placeholder with real content from context.md and brand.md:
 - `name` / `shortName` — product name from context.md
-- `url` — domain from context.md (use `https://` prefix)
+- `url` — from the **URL** section of context.md (use `https://` prefix). **If the URL section is blank, do NOT guess or use a placeholder — stop and tell Luke: "Fill in the URL field in context.md. Format: toolname.modrynstudio.com"**
 - `description` — 110–160 char meta description that describes what the product does and who it's for
 - `ogTitle` — 50–60 char title formatted as "Product Name | Short Value Prop"
 - `ogDescription` — 110–160 char OG description, slightly more marketing-forward than the meta description
@@ -61,7 +61,7 @@ Check the `Monetization` section of `context.md`.
 No npm packages, no API routes, no env vars needed.
 
 1. User creates a Payment Link at stripe.com → Payment Links
-2. Set the Payment Link's success URL to the tool page with `?paid=true` appended (e.g. `https://modrynstudio.com/tools/my-tool?paid=true`)
+2. Set the Payment Link's success URL to the tool page with `?paid=true` appended (e.g. `https://toolname.modrynstudio.com?paid=true`)
 3. Pass the Payment Link URL as the `checkoutUrl` prop on `<PayGate>`:
    ```tsx
    <PayGate checkoutUrl="https://buy.stripe.com/xxxxx" price="$9" valueProposition="Unlock full results">

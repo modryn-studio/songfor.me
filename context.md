@@ -6,6 +6,13 @@
 ## Target User
 <!-- Who is it for? Be specific — describe one real person, not a demographic. -->
 
+## URL
+<!-- The deployed URL for this tool.
+     All tools live on a subdomain of modrynstudio.com — no separate domain purchase needed.
+     Format: toolname.modrynstudio.com
+     Example: hiking-finder.modrynstudio.com
+     Exception: pre-existing brands with their own domain (e.g. specifythat.com). -->
+
 ## Stack Additions
 <!-- Any services beyond the boilerplate defaults (Next.js, Tailwind, Vercel, GA4)?
      e.g. Resend for email, Stripe for payments, Prisma + Supabase for database -->
