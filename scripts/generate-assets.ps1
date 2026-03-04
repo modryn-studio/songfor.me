@@ -65,8 +65,8 @@ if (-not (Get-Command magick -ErrorAction SilentlyContinue)) {
 }
 
 # ── Read site name + brand colors from site.ts ───────────────────────────────
-$siteName    = "Your Site"
-$bgColor     = "#111111"
+$siteName   = "Your Site"
+$bgColor    = "#111111"
 $accentColor = "#6366f1"
 $siteTs = "src\config\site.ts"
 if (Test-Path $siteTs) {
@@ -90,7 +90,7 @@ if (Test-Path $siteTs) {
 }
 
 Write-Host ""
-Write-Host "  Generating assets — site: $siteName" -ForegroundColor Cyan
+Write-Host "  Generating assets - site: $siteName" -ForegroundColor Cyan
 Write-Host ""
 
 # ── Favicon pair ─────────────────────────────────────────────────────────────
@@ -114,16 +114,16 @@ if (Test-Path $logomarkDark) {
 Write-Host "  + public/icon-light.png"
 Write-Host "  + public/icon-dark.png"
 
-# ── icon.png: manifest + JSON-LD (brand bg, inverted mark) ───────────────────
+# ── icon.png: manifest + JSON-LD (dark bg, colored mark) ─────────────────────
 magick -size 1024x1024 xc:"$bgColor" `
-    '(' $logomark -channel RGB -negate -resize 800x800 ')' `
+    '(' $logomark -resize 800x800 ')' `
     -gravity Center -composite "public\icon.png"
 Write-Host "  + public/icon.png"
 
-# ── apple-icon.png: iOS home screen (brand bg, 180x180) ──────────────────────
+# ── apple-icon.png: iOS home screen (dark bg, 180x180) ───────────────────────
 if (-not (Test-Path "src\app")) { New-Item -ItemType Directory -Path "src\app" | Out-Null }
 magick -size 180x180 xc:"$bgColor" `
-    '(' $logomark -channel RGB -negate -resize 140x140 ')' `
+    '(' $logomark -resize 140x140 ')' `
     -gravity Center -composite "src\app\apple-icon.png"
 Write-Host "  + src/app/apple-icon.png"
 
@@ -133,7 +133,7 @@ Write-Host "  + public/favicon.ico"
 
 # ── og-image.png: 1200x630 social card ───────────────────────────────────────
 magick -size 1200x630 xc:"$bgColor" `
-    '(' $logomark -channel RGB -negate -resize 100x100 ')' `
+    '(' $logomark -resize 100x100 ')' `
     -gravity North -geometry +0+75 -composite `
     -gravity North -font "Arial-Bold" -pointsize 88 -fill "#e5e5e5" -annotate +0+230 $siteName `
     -fill "$accentColor" -draw "rectangle 0,618 1200,630" `
@@ -148,7 +148,7 @@ if (Test-Path $banner) {
     Write-Host "  + public/brand/banner.png (auto-generated)"
     if (-not (Test-Path "public\brand")) { New-Item -ItemType Directory -Path "public\brand" | Out-Null }
     magick -size 1280x320 xc:"$bgColor" `
-        '(' $logomark -channel RGB -negate -resize 160x160 ')' `
+        '(' $logomark -resize 160x160 ')' `
         -gravity West -geometry +100+0 -composite `
         -gravity West -font "Arial-Bold" -pointsize 72 -fill "#e5e5e5" -annotate +300+0 $siteName `
         $banner
