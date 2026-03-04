@@ -58,6 +58,19 @@ Usage: switch to Agent mode, then type:
 
 **`/launch`** — Distribution checklist. Run after `/seo`. Audits and fixes sharing hooks, social footer links, dynamic OG images, and FAQPage schema. Then walks you through the launch day posting sequence: build log → Ship or Die → X → dev.to → HN → Reddit → Product Hunt (optional).
 
+**When to run each command:**
+
+| Command | When |
+| --- | --- |
+| `/init` | Once, at project start |
+| `/update` | Any time source docs change |
+| `/deps` | Any time you're questioning staleness |
+| `/assets` | Once, when logomark is ready |
+| `/tool` | Twice: at start (register) + at launch (flip to live) |
+| `/log` | Any time you want to write a build post |
+| `/seo` | Pre-launch, once |
+| `/launch` | Pre-launch, after `/seo` |
+
 Usage: type any slash command in chat.
 
 ## Hooks (auto-runs after edits)
@@ -164,13 +177,6 @@ Run these in order when shipping this product:
 3. `/launch` — distribution checklist: sharing hooks, OG, social, screenshots
 4. Merge the `/log` and `/tool` PRs on modryn-studio-v2
 5. Switch to **modryn-studio-v2** and run `/social` — that's where voice rules live
-
-## Day-to-Day Workflow
-
-1. **Plan** → use Plan mode to scope the feature
-2. **Build** → switch to Agent mode and execute
-3. **Ship** → type `@check`
-4. **Push** → review the commit diff, then `git push` yourself
 
 > After editing `context.md` or `brand.md` → run `/update` before continuing to build. Skip this and Copilot works off stale context.
 
