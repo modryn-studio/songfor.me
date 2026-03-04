@@ -1,5 +1,25 @@
 # Copilot Setup — How To Use
 
+## New Project Setup
+
+1. Create a blank repo on GitHub, then clone it locally
+2. Clone this repo into the project folder:
+   ```powershell
+   git clone https://github.com/modryn-studio/nextjs_boilerplate .
+   ```
+3. Re-point the remote to the new project repo:
+   ```powershell
+   git remote set-url origin https://github.com/modryn-studio/YOUR-REPO
+   ```
+4. Run `npm install`
+5. Fill in `context.md` — product idea, target user, stack additions, routes, and this project's GitHub URL in Social Profiles
+6. Fill in `brand.md` — voice, visual rules, emotional arc, and copy examples
+7. Type `/init` — Copilot reads all three files and fills in `.github/copilot-instructions.md` + `src/config/site.ts`
+8. Drop your logomark at `public/brand/logomark.png` and type `/assets`
+9. Push to `main` — you're live on the new repo
+
+---
+
 ## Modes (built into VS Code)
 
 | Mode | When to use | How |
@@ -81,34 +101,6 @@ context.md                         ← Fill this in per project (product facts +
 brand.md                           ← Fill this in per project (voice, visuals, copy examples)
 development-principles.md          ← Permanent product philosophy — do not edit per project
 ```
-
-## New Project Setup
-
-### Option A — Start from scratch (recommended)
-
-1. Create a blank repo on GitHub, then clone it locally
-2. Clone the boilerplate into the project folder:
-   ```powershell
-   git clone https://github.com/modryn-studio/boilerplate .
-   ```
-3. Re-point the remote to the new project repo:
-   ```powershell
-   git remote set-url origin https://github.com/modryn-studio/YOUR-REPO
-   ```
-4. Run `npm install` — installs Next.js, Tailwind, Prettier, and all dependencies
-5. Fill in `context.md` — product idea, target user, stack additions, routes, and this project's GitHub URL in Social Profiles
-6. Fill in `brand.md` — voice, visual rules, emotional arc, and copy examples
-7. Type `/init` — Copilot reads all three files and fills in `.github/copilot-instructions.md` + `src/config/site.ts`
-8. Drop your logomark at `public/brand/logomark.png` and type `/assets`
-9. Push to `main` — you're live on the new repo
-
-### Option B — Layer onto an existing Next.js project
-
-1. Copy `.github/`, `.vscode/`, `src/lib/`, `src/config/`, `scripts/`, `context.md`, `brand.md`, and `development-principles.md` into the project root
-2. Run `npm install` — installs Prettier (Next.js is already in your project)
-3. Fill in `context.md` and `brand.md`
-4. Type `/init`
-5. Drop your logomark at `public/brand/logomark.png` and type `/assets`
 
 ## Brand Assets
 
