@@ -50,7 +50,7 @@ Usage: switch to Agent mode, then type:
 
 **`/log`** — Draft a build log post for modrynstudio.com. Reads recent commits from this repo, asks for context, then opens a PR on `modryn-studio/modryn-studio-v2` with a draft MDX post. Fill in the TODOs, merge to publish.
 
-**`/deps`** — Check all dependencies for newer versions. Shows outdated packages, asks before updating.
+**`/deps`** — Validate all dependencies against live documentation. Checks version gaps AND API pattern changes. Web searches changelogs and migration guides for every key package, then shows two tables: version status + breaking API changes to know about. Run this any time you're unsure if I'm building with current patterns.
 
 **`/assets`** — Generate all favicons, icons, OG image, and README banner from your logomark. Checks prerequisites (logomark exists, ImageMagick installed), runs the generator, and commits the output.
 
@@ -85,7 +85,7 @@ Configured via `editor.formatOnSave: true` in `.vscode/settings.json`. Requires 
 │   ├── update.prompt.md           ← /update command (cascade edits to context.md/brand.md into derived files)
 │   ├── assets.prompt.md           ← /assets command (generate favicons, icons, OG image, banner)
 │   ├── tool.prompt.md             ← /tool command (register/update tool on modrynstudio.com → PR)
-│   ├── deps.prompt.md             ← /deps command (update checker)
+│   ├── deps.prompt.md             ← /deps command (version + API pattern validator)
 │   ├── log.prompt.md              ← /log command (draft build log post → PR on modryn-studio-v2)
 │   ├── seo.prompt.md              ← /seo command (SEO audit + registration)
 │   └── launch.prompt.md           ← /launch command (distribution: sharing hooks, social, community posting)
@@ -108,10 +108,10 @@ development-principles.md          ← SOURCE OF TRUTH: product philosophy — p
 
 > **Cascade rule:** `context.md`, `brand.md`, and `development-principles.md` are the source of truth. Edit them → run `/update` immediately. `copilot-instructions.md`, `site.ts`, and `next.config.ts` are derived — do not edit them directly.
 
-| Source edited | Run |
-| --- | --- |
-| Any source doc (first time, new project) | `/init` |
-| Any source doc (after init already ran) | `/update` |
+| Source edited                            | Run       |
+| ---------------------------------------- | --------- |
+| Any source doc (first time, new project) | `/init`   |
+| Any source doc (after init already ran)  | `/update` |
 
 ## Brand Assets
 
