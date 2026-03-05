@@ -21,6 +21,12 @@ applyTo: "**/*.ts,**/*.tsx,**/app/**"
 - Export a `metadata` object or `generateMetadata()` function from every `page.tsx` — never use raw `<head>` or `<title>` tags
 - Use `generateMetadata()` for dynamic routes (e.g., `/tools/[slug]`)
 - Include `title`, `description`, and `openGraph` in every metadata export
+- **`'use client'` blocks metadata exports silently** — Next.js ignores `metadata` in client components with no build error or warning. If a page needs both metadata and client hooks (`useSearchParams`, `useRouter`, `useState`, etc.), use the server shell + client content pattern from the start:
+  ```
+  page.tsx          ← server component, exports metadata, renders <ClientContent />
+  page-content.tsx  ← 'use client', all hooks live here, wrapped in <Suspense>
+  ```
+  Never write a page as `'use client'` and plan to add metadata later — there is no later.
 - Export `viewport` separately from `metadata` — do not nest it inside the metadata object:
   ```ts
   import type { Viewport } from 'next';
