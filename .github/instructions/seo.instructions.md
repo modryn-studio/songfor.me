@@ -8,7 +8,8 @@ applyTo: "**/*.ts,**/*.tsx"
 ## Metadata
 - Every route must export a `metadata` object or `generateMetadata` function.
 - Include `title`, `description`, and `openGraph` in all metadata.
-- OG title: 50–60 characters max.
+- **`<title>` tag: 50–60 characters minimum.** Never use `site.name` alone as a title — it is too short. Use `site.ogTitle` as the default title in `layout.tsx`, and combine page name + site name for all other pages.
+- OG title: 50–60 characters. Use the same value as the `<title>` tag.
 - OG description: 110–160 characters max.
 - OG image: 1200×630px, referenced as `/og-image.png`. Use a dedicated OG image — never the README banner.
 - OG must include `title`, `description`, `images` (with `url`, `width`, `height`, `alt`), and `siteName`.

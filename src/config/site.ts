@@ -7,8 +7,12 @@ export const site = {
   url: 'https://DOMAIN.com', // TODO: replace with actual domain
   // Base description — used in <meta description>, manifest, JSON-LD
   description: 'TODO: meta description (110–160 chars)',
-  // Longer form for social cards
-  ogTitle: 'TODO: OG title (50–60 chars)',
+  // Used as the <title> tag (homepage + fallback) AND social card title.
+  // MUST be 50–60 chars — site.name alone is too short for SEO and will be
+  // flagged by Bing/Google as a non-compliant title tag.
+  // Pattern: '[Site Name] — [5–7 word tagline describing the tool]'
+  // Example: 'GoAnyway — Find an Event and Walk In Confident'
+  ogTitle: 'TODO: [Site Name] — [tagline] (50–60 chars)',
   ogDescription: 'TODO: OG description (110–160 chars)',
   founder: 'Luke Hanner',
   // Brand colors — used in manifest theme_color / background_color
