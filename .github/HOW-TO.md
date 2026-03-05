@@ -73,6 +73,8 @@ Usage: switch to Agent mode, then type:
 
 Usage: type any slash command in chat.
 
+> **modryn-studio-v2 commands** — `/deploy` and `/social` only exist in the modryn-studio-v2 repo. Switch to that workspace to run them (see Launch Sequence below).
+
 ## Hooks (auto-runs after edits)
 
 **Format on Save** — Files are automatically formatted with Prettier whenever you save.
@@ -178,7 +180,11 @@ Run these in order when shipping this product:
 2. `/seo` — technical SEO audit and fixes
 3. `/launch` — distribution checklist: sharing hooks, OG, social, screenshots
 4. Merge the `/log` and `/tool` PRs on modryn-studio-v2
-5. Switch to **modryn-studio-v2** and run `/social` — that's where voice rules live
+5. Switch to **modryn-studio-v2** in VS Code, then run in order:
+   - `/deploy` — adds the rewrite entry to `next.config.ts` pointing `modrynstudio.com/tools/[slug]/*` → this tool's Vercel URL. **Never add this rewrite manually from the tool repo.**
+   - `/social` — generates launch copy using v2 voice rules
+
+> `/deploy` and `/social` are modryn-studio-v2 commands. They only work when modryn-studio-v2 is open in VS Code.
 
 > After editing `context.md` or `brand.md` → run `/update` before continuing to build. Skip this and Copilot works off stale context.
 
