@@ -92,6 +92,7 @@ Read through the codebase and check for ALL of the following:
 **SEO**
 - [ ] All metadata includes `title`, `description`, and `openGraph`
 - [ ] Meta descriptions are 150–160 characters. Check all `description:` values in `src/app/**/page.tsx` and all `description:` frontmatter in `content/log/*.mdx` and `content/tools/*.json`. Flag any under 100 chars as WARN; flag any missing as FAIL.
+- [ ] Title tags are 50–60 characters. Check computed titles: static pages use the hardcoded `title:` value; tool pages use `${tool.name}: ${tool.tagline} — Modryn Studio` (flag any tool with no tagline); log post pages use `post.seoTitle` if set, else `${post.title} | Modryn Studio Build Log`. Flag any resulting title under 40 chars as FAIL; under 50 chars as WARN.
 - [ ] Semantic HTML: `<main>`, `<article>`, `<section>`, `<nav>` used correctly
 - [ ] One `<h1>` per page, headings in sequential order
 - [ ] All images have descriptive `alt` text
