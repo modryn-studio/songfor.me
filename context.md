@@ -1,4 +1,4 @@
-# Project Context
+﻿# Project Context
 
 ## Product
 <!-- What is this product? One or two sentences. -->
@@ -28,6 +28,8 @@
 -->
 
 mode: <!-- modryn-app | standalone-subdomain | standalone-domain -->
+
+modrynstudio.com has a verified **Domain property** in Google Search Console. All tools under that domain are covered automatically. Never walk through domain verification steps  just submit the tool sitemap to the existing property.
 url:  <!-- https://modrynstudio.com/tools/your-slug -->
 basePath: <!-- /tools/your-slug   (leave empty for standalone modes) -->
 
@@ -70,3 +72,4 @@ basePath: <!-- /tools/your-slug   (leave empty for standalone modes) -->
 - GitHub: https://github.com/TODO
 - Dev.to: https://dev.to/lukehanner
 - Ship or Die: https://shipordie.club/lukehanner
+
