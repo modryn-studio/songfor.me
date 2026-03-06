@@ -18,9 +18,13 @@ Ask for the following if not already provided:
    - If neither exists: ask the user to drop screenshots into `public/screenshots/`. Preferred: `<slug>-light.png` + `<slug>-dark.png`. A single `<slug>.gif` is also accepted for an animated preview.
    - Derive public URLs from the tool's `url` hostname: `https://<domain>/screenshots/<slug>-light.png` (light) and `https://<domain>/screenshots/<slug>-dark.png` (dark).
    - Set `screenshotUrl` = light URL, `screenshotUrlDark` = dark URL (omit `screenshotUrlDark` if no dark variant exists).
-6. **Launched date** — (optional, only if status is `live` or `beta`) ISO date, e.g. `2026-03-01`
-7. **Log slug** — (optional) slug of the `/log` post documenting this build
-8. **Target subreddits** — (optional) 2–4 subreddits where the tool's target users hang out. Used by the `/social` prompt for launch-day distribution. Don't include r/SideProject (always included as founder channel). Example: `["r/webdev", "r/freelance"]`
+6. **Logo URL** — (optional) public URL to the tool's square logomark (transparent background, ideally 40×40 or larger). Default to:
+   - `https://<domain>/icon.png` if the tool is deployed on its own domain
+   - `https://modrynstudio.com/tools/<slug>/icon.png` for modryn-hosted tools
+   - Omit the field entirely if no logomark exists yet.
+7. **Launched date** — (optional, only if status is `live` or `beta`) ISO date, e.g. `2026-03-01`
+8. **Log slug** — (optional) slug of the `/log` post documenting this build
+9. **Target subreddits** — (optional) 2–4 subreddits where the tool's target users hang out. Used by the `/social` prompt for launch-day distribution. Don't include r/SideProject (always included as founder channel). Example: `["r/webdev", "r/freelance"]`
 
 Then:
 - Derive the slug from the name (lowercase, spaces → hyphens, strip special chars)
