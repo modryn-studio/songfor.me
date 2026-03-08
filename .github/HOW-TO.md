@@ -1,4 +1,4 @@
-﻿# Copilot Setup — How To Use
+# Copilot Setup — How To Use
 
 ---
 
@@ -16,11 +16,13 @@ Run these once when starting a new project.
    git remote set-url origin https://github.com/modryn-studio/YOUR-REPO
    ```
 4. Run `npm install`
-5. Fill in `context.md` — product idea, target user, stack additions, routes, and this project's GitHub URL in Social Profiles
-6. Fill in `brand.md` — voice, visual rules, emotional arc, and copy examples
-7. Type `/init` — reads all three source docs, fills in `copilot-instructions.md` + `src/config/site.ts`
-8. Drop your logomark at `public/brand/logomark.png` and type `/assets` — generates all favicons, icons, and banner
-9. Push to `main`
+5. Open chat (`Ctrl+Alt+I`), select **Agent** mode, then pick **@prebuilt**
+6. Describe the product idea — @prebuilt researches the market, validates against strategy, pushes back, and sharpens the concept
+7. When the plan is ready, tell @prebuilt **"fill it in"** — it fills `context.md` and `brand.md`
+8. Run `/validate` — web-searches competitors, user pain, SEO opportunity, and brand positioning. Review the report and iterate on docs if needed.
+9. Type `/init` — reads all three source docs, fills in `copilot-instructions.md` + `src/config/site.ts`
+10. Drop your logomark at `public/brand/logomark.png` and type `/assets` — generates all favicons, icons, and banner
+11. Push to `main`
 
 > After setup, **never edit `copilot-instructions.md` or `site.ts` directly**. Edit the source docs → run `/update`.
 
@@ -40,10 +42,13 @@ Edit `context.md` or `brand.md` → run `/update` immediately. Skipping this mea
 Run `/deps` — validates all dependencies against live docs, surfaces breaking API changes.
 
 **Register the tool on modrynstudio.com early**
-Run `/tool` as soon as you have a homepage or hero built  even if the tool isn't functional yet. Use `status: "building"`. This puts it on the studio site immediately and starts building the URL footprint. Merge the PR as soon as it's up  don't hold it for launch.
+Run `/tool` as soon as you have a homepage or hero built — even if the tool isn't functional yet. Use `status: "building"`. This puts it on the studio site immediately and starts building the URL footprint. Merge the PR as soon as it's up — don't hold it for launch.
 
 **Write a build log entry**
-Run `/log` any time something worth documenting ships  a working core feature, a key decision, a milestone. Don't save it for launch. Each post builds the public record and the SEO footprint while you're still building. Merge each PR as it's ready.
+Run `/log` any time something worth documenting ships — a working core feature, a key decision, a milestone. Don't save it for launch. Each post builds the public record and the SEO footprint while you're still building. Merge each PR as it's ready.
+
+**Validate before a major phase**
+Run `/validate` with a focus area (e.g. "validate the route map" or "validate the pricing") before building a major component. Catches misalignment early.
 
 ---
 
@@ -53,7 +58,7 @@ Run these in order before going live. Each one builds on the last.
 
 1. **`@check`** — quality gate. Scans for bugs, secrets, and code issues → auto-fixes what it can → runs lint + build → commits fixes. Never pushes.
 2. **`/seo`** — auto-generates any missing SEO files, audits the codebase, walks through Search Console + Bing setup.
-3. **`/launch`**  distribution checklist. Fixes sharing hooks, social footer, and share-on-X hooks. Always runs `/log` (launch post) and `/tool` (flip to `live`)  even if you ran them in Phase 2, these are the launch versions.
+3. **`/launch`** — distribution checklist. Fixes sharing hooks, social footer, and share-on-X hooks. Always runs `/log` (launch post) and `/tool` (flip to `live`) — even if you ran them in Phase 2, these are the launch versions.
 
 ---
 
@@ -80,18 +85,26 @@ Run these in order before going live. Each one builds on the last.
 
 Open chat: `Ctrl+Alt+I`
 
+### Custom Agents
+
+| Agent       | What it does                                                                            | When                    |
+| ----------- | --------------------------------------------------------------------------------------- | ----------------------- |
+| `@prebuilt` | Pre-build discovery: researches market, validates idea, fills `context.md` + `brand.md` | Phase 1, before `/init` |
+| `@check`    | Pre-ship quality gate: bugs, secrets, lint, build → auto-fixes and commits              | Phase 3, before `/seo`  |
+
 ### All Slash Commands
 
-| Command   | What it does                                                                 | When                                                       |
-| --------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `/init`   | One-time setup: fills `copilot-instructions.md` + `site.ts` from source docs | Once, at project start                                     |
-| `/update` | Cascades edits from source docs into derived files                           | Any time `context.md` or `brand.md` changes                |
-| `/assets` | Generates favicons, icons, and banner from your logomark                     | Once when logomark is ready; re-run after logomark changes |
-| `/tool`   | Registers/updates this tool on modrynstudio.com via PR                       | Early (status: building) + at launch (status: live)        |
-| `/log`    | Drafts a build log post and opens a PR on modryn-studio-v2                   | Any time something worth documenting ships                 |
-| `/deps`   | Validates dependencies against live docs; flags version gaps + API changes   | Any time you're questioning staleness                      |
-| `/seo`    | Pre-launch SEO audit + Search Console / Bing setup                           | Pre-launch, once                                           |
-| `/launch` | Distribution checklist: sharing hooks, OG, social, community posting guide   | Pre-launch, after `/seo`                                   |
+| Command     | What it does                                                                 | When                                                       |
+| ----------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `/init`     | One-time setup: fills `copilot-instructions.md` + `site.ts` from source docs | Once, at project start (after @prebuilt)                   |
+| `/update`   | Cascades edits from source docs into derived files                           | Any time `context.md` or `brand.md` changes                |
+| `/validate` | Validates context + brand against live market data, competitors, and SEO     | After filling docs; before major build phases              |
+| `/assets`   | Generates favicons, icons, and banner from your logomark                     | Once when logomark is ready; re-run after logomark changes |
+| `/tool`     | Registers/updates this tool on modrynstudio.com via PR                       | Early (status: building) + at launch (status: live)        |
+| `/log`      | Drafts a build log post and opens a PR on modryn-studio-v2                   | Any time something worth documenting ships                 |
+| `/deps`     | Validates dependencies against live docs; flags version gaps + API changes   | Any time you're questioning staleness                      |
+| `/seo`      | Pre-launch SEO audit + Search Console / Bing setup                           | Pre-launch, once                                           |
+| `/launch`   | Distribution checklist: sharing hooks, OG, social, community posting guide   | Pre-launch, after `/seo`                                   |
 
 > **modryn-studio-v2 only:** `/deploy` and `/social` exist only in that repo. Switch workspaces to run them.
 
@@ -142,10 +155,12 @@ Or run directly (requires [ImageMagick](https://imagemagick.org)):
 │   ├── nextjs.instructions.md     ← Auto-applied to .ts/.tsx files
 │   └── seo.instructions.md        ← Auto-applied to .ts/.tsx files
 ├── agents/
-│   └── check.agent.md             ← @check agent (pre-ship quality gate)
+│   ├── check.agent.md             ← @check agent (pre-ship quality gate)
+│   └── prebuilt.agent.md          ← @prebuilt agent (pre-build discovery)
 ├── prompts/
 │   ├── init.prompt.md             ← /init
 │   ├── update.prompt.md           ← /update
+│   ├── validate.prompt.md         ← /validate
 │   ├── assets.prompt.md           ← /assets
 │   ├── tool.prompt.md             ← /tool
 │   ├── deps.prompt.md             ← /deps
@@ -167,8 +182,9 @@ scripts/
 context.md                         ← SOURCE OF TRUTH: product, stack, routes, monetization
 brand.md                           ← SOURCE OF TRUTH: voice, visuals, user types, copy
 development-principles.md          ← SOURCE OF TRUTH: product philosophy (permanent)
+strategy.md                        ← SOURCE OF TRUTH: monetization, distribution, launch playbook (permanent)
 ```
 
-> **Tip:** To debug why a prompt or instruction isn't loading, open the Agent Debug panel: `Command Palette  Developer: Open Agent Debug Panel`. Shows system prompts, tool calls, and every customization loaded for the session. Replaces the old Diagnostics gear menu.
+> **Tip:** To debug why a prompt or instruction isn't loading, open the Agent Debug panel: `Command Palette → Developer: Open Agent Debug Panel`. Shows system prompts, tool calls, and every customization loaded for the session. Replaces the old Diagnostics gear menu.
 
 > **Tip:** After any session where you corrected Copilot on a boilerplate pattern, type `/create-instruction` to turn those corrections into a persistent `.instructions.md` file. Save it to `.github/instructions/` so it travels with the boilerplate. For multi-step procedures (e.g. a fix workflow), `/create-skill` packages it as a reusable runbook instead.

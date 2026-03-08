@@ -1,5 +1,5 @@
-﻿// Single source of truth for all site-wide metadata.
-// /project-init fills this in from context.md + brand.md.
+// Single source of truth for all site-wide metadata.
+// /init fills this in from context.md + brand.md.
 // Every other file imports from here — never hardcode site metadata elsewhere.
 export const site = {
   name: 'TODO: site name',
@@ -30,4 +30,3 @@ export const site = {
     shipordie: 'https://shipordie.club/lukehanner',
   },
 } as const;
-

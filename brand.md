@@ -1,6 +1,6 @@
 # Brand
 
-Fill this in before running `/project-init`. It populates the Brand & Voice section of `copilot-instructions.md`.
+Fill this in before running `/init`. It populates the Brand & Voice section of `copilot-instructions.md`.
 
 ---
 
