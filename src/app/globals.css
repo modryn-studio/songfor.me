@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-accent: #ff6b6b; /* Coral — CTAs, logomark, key UI moments */
+  --color-secondary: #ffd93d; /* Gold — celebration states only */
+  --color-bg: #fffaf5; /* Cream — background base */
+  --color-text: #1c1410; /* Ink — warm near-black body text */
+  --color-muted: #9c8070; /* Dusk — secondary text, placeholders */
+  --color-surface: #ffffff; /* card / input backgrounds */
+  --color-border: #e8ded6; /* warm light border */
+  --font-heading: 'Instrument Serif', serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

@@ -24,4 +24,5 @@ export const analytics = {
   track,
   newsletterSignup: () => track('newsletter_signup'),
   feedbackSubmit: () => track('feedback_submit'),
+  paymentGate: (action: string) => track('payment_gate', { action }),
 };

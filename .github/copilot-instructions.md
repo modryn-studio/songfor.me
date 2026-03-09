@@ -1,39 +1,89 @@
-# [Project Name] — Copilot Context
+# songfor.me — Copilot Context
 
 ## Who I Am
-<!-- TODO: describe yourself, your product, and your target user -->
+
+I'm Luke Hanner — a solo founder who ships AI-assisted tools fast. songfor.me is a personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, quirks, inside jokes, and preferred vibe. Songs are manually generated on Suno V5 (concierge model) and delivered via a shareable song page with email notification. Target user: impulse gifters — a mom, dad, or friend who just realized someone's birthday is today and wants to give something personal, not generic. $9.99/song, delivered in ~15 minutes.
 
 ## Deployment
+
 <!-- Filled in by /init from context.md.
      Read this before touching next.config.ts, BASE_PATH, site.ts, or any hardcoded URL.
      If mode is modryn-app:         basePath must stay set in next.config.ts.
      If mode is standalone-*:       basePath must be absent from next.config.ts. -->
 
-mode: <!-- modryn-app | standalone-subdomain | standalone-domain -->
-url:  <!-- canonical URL -->
-basePath: <!-- /tools/your-slug   (empty for standalone modes) -->
+mode: standalone-domain
+url: https://songfor.me
+basePath:
 
 ## Stack
-- Next.js 15 (App Router) with TypeScript
-- Tailwind CSS for styling
-- Vercel for deployment
+
+- Next.js 16 (App Router) with TypeScript
+- React 19
+- Tailwind CSS 4 for styling
+- Stripe for one-time payments ($9.99/song)
+- Resend for transactional email (song delivery, confirmations)
+- Nodemailer for feedback/contact emails
+- Lucide React for icons
+- clsx + tailwind-merge for class utilities
+- Vercel for deployment (Pro plan — commercial use)
 - GA4 for custom event tracking (via `@/lib/analytics.ts` — never call `gtag()` directly)
 - Vercel Analytics `<Analytics />` component in `layout.tsx` for pageviews only — do not use their `track()` API
-<!-- TODO: add project-specific services (e.g. Resend, Stripe, Prisma, Supabase) -->
+- **Planned (not yet installed):** Supabase (Postgres DB + Storage for orders, songs, MP3s), Claude API / Anthropic SDK (conversational intake + lyrics generation)
 
 ## Project Structure
+
 ```
 /app                    → Next.js App Router pages
 /components             → Reusable UI components
 /lib                    → Utilities, helpers, data fetching
-<!-- TODO: add any project-specific directories -->
+/content/prompts/       → Claude system prompt templates (lyrics + style string generation)
+/lib/suno/              → Future Suno API abstraction layer (adapter pattern)
+/lib/queue/             → Order queue management utilities
+/emails/                → React Email templates for Resend (song delivery, order confirmation)
 ```
 
 ## Route Map
-<!-- TODO: list every route and what it does -->
-- `/`                → (home)
-- `/privacy`         → Privacy policy
-- `/terms`           → Terms of service
+
+- `/` → Landing page. Hero + single CTA ("Start their song →"). Email capture for non-buyers.
+- `/create` → Conversational intake UI. Claude-powered chat collecting recipient details, quirks, vibe, genre.
+- `/create/confirmed` → Post-payment confirmation. "Your song is being crafted" + confetti.
+- `/song/[id]` → Public shareable song page. Audio player, lyrics, share buttons.
+- `/admin` → Password-protected admin dashboard. View orders, upload MP3, mark done.
+- `/privacy` → Privacy policy
+- `/terms` → Terms of service
+
+## Brand & Voice
+
+**Voice:**
+
+- Warm, celebratory, but never cheesy. Like a friend who gives great gifts, not a Hallmark card.
+- Short sentences. Conversational. Reads like a text from someone who knows you.
+- Confident about what it does ("this will make them cry happy tears") without overselling the tech.
+- Never use: "AI-powered", "leverage", "revolutionary", "seamless", "unlock", "utilize", "cutting-edge", "game-changer"
+
+**Target User:** A mom scrolling her phone at 10pm realizing her kid's friend's birthday party is tomorrow and she forgot a gift. Or a 30-something who just saw their best friend's birthday post on Instagram and wants to do something that actually means something — not another gift card. Impulse gifters with good hearts and no time.
+
+**Visual Rules:**
+
+- Colors: Coral `#FF6B6B` (primary/CTAs/logomark), Gold `#FFD93D` (celebration moments only), Cream `#FFFAF5` (bg), Ink `#1C1410` (body text), Dusk `#9C8070` (muted/borders)
+- Fonts: Inter (body) + Instrument Serif (headlines)
+- Motion: Confetti on delivery, gentle pulse on waiting state — nothing else
+- No dark mode (this is a gift — it should feel bright). No stock photos. No generic music note clipart.
+
+**Emotional Arc:**
+
+- Land: "Wait — I can make a real song for them? Right now?"
+- Intake: "This is fun. It feels like I'm writing them a love letter."
+- Waiting: "I can't wait to hear this. I hope it's good."
+- Delivery: "Oh my god. This is so them. I'm sending this right now."
+- Share: "Everyone needs to hear this. I'm posting this."
+
+**Copy Reference:**
+
+- Hero: "Make them a birthday song they'll never forget."
+- CTA: "Start their song →"
+- Waiting: "Your song is being crafted with love and a little bit of magic ✨"
+- Error: "Something went sideways. Try again — [Name] is worth it."
 
 ## README Standard
 
@@ -54,6 +104,7 @@ Next.js · TypeScript · Tailwind CSS · Vercel
 ```
 
 Rules:
+
 - **Banner image** — always first. Path is `public/brand/banner.png`.
 - **H1 title** — product name only, no subtitle.
 - **Tagline** — one sentence. What the user gets. No buzzwords ("powerful", "seamless", "AI-powered").
@@ -63,6 +114,7 @@ Rules:
 - **Nothing else.** No install instructions, no contributing section, no architecture diagrams, no screenshots beyond the banner. Real docs go in `/docs` or on the live site.
 
 When adding a badge row (optional, for open source tools/libraries only):
+
 - Place it between the H1 and the tagline
 - Use shields.io format: `[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)`
 - Keep it to 3 badges max: typically license + CI status + live site
@@ -73,25 +125,28 @@ When adding a badge row (optional, for open source tools/libraries only):
 This project uses Tailwind CSS v4. The rules are different from v3 — follow these exactly.
 
 **Design tokens live in `@theme`, not `:root`:**
+
 ```css
 /* ✅ correct — generates text-accent, bg-surface, border-border, etc. */
 @theme {
-  --color-accent: #F97415;
-  --color-surface: #111111;
-  --color-border: #222222;
-  --color-muted: #666666;
-  --color-text: #e5e5e5;
-  --color-bg: #050505;
-  --font-heading: var(--font-sans);
+  --color-accent: #ff6b6b; /* Coral — CTAs, logomark, key UI moments */
+  --color-secondary: #ffd93d; /* Gold — celebration moments only */
+  --color-bg: #fffaf5; /* Cream — background base */
+  --color-text: #1c1410; /* Ink — warm near-black body text */
+  --color-muted: #9c8070; /* Dusk — secondary text, borders, placeholders */
+  --color-surface: #ffffff;
+  --color-border: #e8ded6; /* warm border */
+  --font-heading: 'Instrument Serif', serif;
 }
 
 /* ❌ wrong — :root creates CSS variables but NO utility classes */
 :root {
-  --color-accent: #F97415;
+  --color-accent: #ff6b6b;
 }
 ```
 
 **Use `(--color-*)` shorthand in class strings — never `[var(--color-*)]`:**
+
 ```tsx
 // ✅ correct — TW v4 native shorthand
 <div className="border-(--color-border) bg-(--color-surface) text-(--color-muted)" />
@@ -101,6 +156,7 @@ This project uses Tailwind CSS v4. The rules are different from v3 — follow th
 ```
 
 If tokens are defined in `@theme`, you can also use the short utility names directly:
+
 ```tsx
 // ✅ also correct when @theme is properly set up
 <div className="border-border bg-surface text-muted text-accent" />
@@ -119,9 +175,13 @@ const log = createRouteLogger('my-route');
 export async function POST(req: Request): Promise<Response> {
   const ctx = log.begin();
   try {
-    log.info(ctx.reqId, 'Request received', { /* key fields */ });
+    log.info(ctx.reqId, 'Request received', {
+      /* key fields */
+    });
     // ... handler body ...
-    return log.end(ctx, Response.json(result), { /* key result fields */ });
+    return log.end(ctx, Response.json(result), {
+      /* key result fields */
+    });
   } catch (error) {
     log.err(ctx, error);
     return Response.json({ error: 'Internal error' }, { status: 500 });
@@ -152,12 +212,15 @@ GA4 measurement ID is loaded via `NEXT_PUBLIC_GA_MEASUREMENT_ID` in `layout.tsx`
 ## Dev Server
 
 Start with `Ctrl+Shift+B` (default build task). This runs:
+
 ```
 npm run dev -- --port 3000 2>&1 | Tee-Object -FilePath dev.log
 ```
+
 Tell Copilot **"check logs"** at any point — it reads `dev.log` and flags errors or slow requests.
 
 ## Code Style
+
 - Write as a senior engineer: minimal surface area, obvious naming, no abstractions before they're needed
 - Comments explain WHY, not what
 - One file = one responsibility
@@ -166,6 +229,7 @@ Tell Copilot **"check logs"** at any point — it reads `dev.log` and flags erro
 - Leave TODO comments for post-launch polish items
 
 ## Core Rules
+
 - Every page earns its place — no pages for businesses not yet running
 - Ship fast, stay honest — empty is better than fake
 - Ugly is acceptable, broken is not — polish the core action ruthlessly

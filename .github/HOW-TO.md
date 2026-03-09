@@ -9,7 +9,7 @@ Run these once when starting a new project.
 1. Create a blank repo on GitHub, then clone it locally
 2. Clone this boilerplate into the project folder:
    ```powershell
-   git clone https://github.com/modryn-studio/nextjs_boilerplate .
+   git clone https://github.com/modryn-studio/nextjs_boilerplate
    ```
 3. Re-point the remote to the new project repo:
    ```powershell
@@ -87,10 +87,10 @@ Open chat: `Ctrl+Alt+I`
 
 ### Custom Agents
 
-| Agent       | What it does                                                                            | When                                   |
-| ----------- | --------------------------------------------------------------------------------------- | -------------------------------------- |
-| `@prebuilt` | Pre-build discovery: researches market, validates idea, fills `context.md` + `brand.md` | Phase 1, when starting from scratch    |
-| `@check`    | Pre-ship quality gate: bugs, secrets, lint, build → auto-fixes and commits              | Phase 3, before `/seo`                 |
+| Agent       | What it does                                                                            | When                                |
+| ----------- | --------------------------------------------------------------------------------------- | ----------------------------------- |
+| `@prebuilt` | Pre-build discovery: researches market, validates idea, fills `context.md` + `brand.md` | Phase 1, when starting from scratch |
+| `@check`    | Pre-ship quality gate: bugs, secrets, lint, build → auto-fixes and commits              | Phase 3, before `/seo`              |
 
 ### All Slash Commands
 

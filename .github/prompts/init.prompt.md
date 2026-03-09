@@ -18,6 +18,7 @@ Then edit `.github/copilot-instructions.md` and replace every `<!-- TODO -->` se
 - **Project Structure** — keep `/app`, `/components`, `/lib`. Add any project-specific directories from context.md. Remove the `<!-- TODO -->` comment.
 - **Route Map** — list every route from context.md with a one-line description. Always include `/privacy` and `/terms`.
 - **Brand & Voice** — populate from brand.md: voice rules, visual rules (colors, fonts, motion), target user description, emotional arc, and copy examples to use as reference.
+- **Tailwind v4 @theme example** — find the `<!-- TODO: update the @theme example below... -->` comment in copilot-instructions.md. Replace the placeholder color values in the `@theme { }` block immediately below it with the actual brand colors from `globals.css`. Update both the hex values and the inline comments (color name + role). Also update the `/* ❌ wrong */` `:root` example to use the real accent color.
 
 Also fill in `src/config/site.ts` — replace every `TODO:` placeholder with real content from context.md and brand.md:
 
@@ -110,10 +111,24 @@ Use when you need dynamic pricing, coupons, or programmatic control.
 
 ---
 
-Finally, wire `FeedbackWidget` into `src/app/layout.tsx`:
+Finally, wire `FeedbackWidget` and analytics into `src/app/layout.tsx`:
 
-- Add `import FeedbackWidget from '@/components/feedback-widget'` with the other component imports
-- Add `<FeedbackWidget />` as the last child inside `<body>`, before `</body>`
+- Add these imports at the top:
+  ```tsx
+  import { Analytics } from '@vercel/analytics/next';
+  import { GoogleAnalytics } from '@next/third-parties/google';
+  import FeedbackWidget from '@/components/feedback-widget';
+  ```
+- Add `<Analytics />` and `<FeedbackWidget />` as the last children inside `<body>`, before `</body>`
+- Add `<GoogleAnalytics>` **outside** `<body>` but inside `<html>`, conditioned on the env var:
+  ```tsx
+  {
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+    );
+  }
+  ```
+  Do NOT use raw `<script>` tags for GA — `GoogleAnalytics` from `@next/third-parties/google` is the correct Next.js 15/16 approach.
 - The widget uses CSS custom properties (`--color-border`, `--color-surface`, `--color-accent`, etc.).
   Verify these exist in `globals.css` inside an `@theme` block — **not** `:root`.
   If `globals.css` doesn't exist, create it with:
@@ -143,5 +158,41 @@ Finally, wire `FeedbackWidget` into `src/app/layout.tsx`:
 
 - This must be present in every project — it's how Luke collects feedback from day one
 
-After editing, confirm what was filled in and flag anything that was missing from context.md or brand.md that Luke should provide.
+---
 
+## Generate Brand Palette
+
+After globals.css is confirmed to have all 5 color tokens, run:
+
+```powershell
+.\scripts\generate-palette.ps1
+```
+
+This generates `public/brand/palette.png` — a visual swatch sheet of the brand colors.
+No logomark needed. Run this now so the palette reference exists before design work begins.
+
+If ImageMagick is not installed, tell Luke:
+
+> "Install ImageMagick from https://imagemagick.org, then run `.\scripts\generate-palette.ps1` to generate your palette swatch sheet."
+
+---
+
+## Create .env.local
+
+Check if `.env.local` already exists. If it does not:
+
+- Run this command in the terminal:
+  ```powershell
+  Copy-Item .env.local.example .env.local
+  ```
+- All values will be blank. Flag each one Luke needs to fill in before the app will work:
+  - `NEXT_PUBLIC_GA_MEASUREMENT_ID` — from Google Analytics → Admin → Data Streams
+  - `GMAIL_USER` / `GMAIL_APP_PASSWORD` — Gmail address + App Password (not account password)
+  - `RESEND_API_KEY` / `RESEND_SEGMENT_ID` — from resend.com → API Keys / Segments
+  - `STRIPE_SECRET_KEY` / `STRIPE_PUBLISHABLE_KEY` / `STRIPE_PRICE_ID` — from stripe.com → Developers → API Keys (only if monetization is `one-time-payment`)
+
+If `.env.local` already exists, skip this step.
+
+---
+
+After editing, confirm what was filled in and flag anything that was missing from context.md or brand.md that Luke should provide.
