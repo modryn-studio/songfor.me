@@ -16,13 +16,13 @@ Run these once when starting a new project.
    git remote set-url origin https://github.com/modryn-studio/YOUR-REPO
    ```
 4. Run `npm install`
-5. Open chat (`Ctrl+Alt+I`), select **Agent** mode, then pick **@prebuilt**
-6. Describe the product idea — @prebuilt researches the market, validates against strategy, pushes back, and sharpens the concept
-7. When the plan is ready, tell @prebuilt **"fill it in"** — it fills `context.md` and `brand.md`
-8. Run `/validate` — web-searches competitors, user pain, SEO opportunity, and brand positioning. Review the report and iterate on docs if needed.
-9. Type `/init` — reads all three source docs, fills in `copilot-instructions.md` + `src/config/site.ts`
-10. Drop your logomark at `public/brand/logomark.png` and type `/assets` — generates all favicons, icons, and banner
-11. Push to `main`
+5. **Fill `context.md` and `brand.md`** — two paths:
+   - **Starting from scratch** → Open chat (`Ctrl+Alt+I`), select **Agent** mode, pick **@prebuilt**. Describe the idea. It researches, validates, and fills both docs when you say "fill it in."
+   - **Docs already filled** → Drop your pre-filled `context.md` and `brand.md` into the project root, replacing the stubs. Skip to step 6.
+6. Run `/validate` — web-searches competitors, user pain, SEO opportunity, and brand positioning. Review the report and iterate on docs if needed.
+7. Type `/init` — reads all three source docs, fills in `copilot-instructions.md` + `src/config/site.ts`
+8. Drop your logomark at `public/brand/logomark.png` and type `/assets` — generates all favicons, icons, and banner
+9. Push to `main`
 
 > After setup, **never edit `copilot-instructions.md` or `site.ts` directly**. Edit the source docs → run `/update`.
 
@@ -87,16 +87,16 @@ Open chat: `Ctrl+Alt+I`
 
 ### Custom Agents
 
-| Agent       | What it does                                                                            | When                    |
-| ----------- | --------------------------------------------------------------------------------------- | ----------------------- |
-| `@prebuilt` | Pre-build discovery: researches market, validates idea, fills `context.md` + `brand.md` | Phase 1, before `/init` |
-| `@check`    | Pre-ship quality gate: bugs, secrets, lint, build → auto-fixes and commits              | Phase 3, before `/seo`  |
+| Agent       | What it does                                                                            | When                                   |
+| ----------- | --------------------------------------------------------------------------------------- | -------------------------------------- |
+| `@prebuilt` | Pre-build discovery: researches market, validates idea, fills `context.md` + `brand.md` | Phase 1, when starting from scratch    |
+| `@check`    | Pre-ship quality gate: bugs, secrets, lint, build → auto-fixes and commits              | Phase 3, before `/seo`                 |
 
 ### All Slash Commands
 
 | Command     | What it does                                                                 | When                                                       |
 | ----------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `/init`     | One-time setup: fills `copilot-instructions.md` + `site.ts` from source docs | Once, at project start (after @prebuilt)                   |
+| `/init`     | One-time setup: fills `copilot-instructions.md` + `site.ts` from source docs | Once, at project start                                     |
 | `/update`   | Cascades edits from source docs into derived files                           | Any time `context.md` or `brand.md` changes                |
 | `/validate` | Validates context + brand against live market data, competitors, and SEO     | After filling docs; before major build phases              |
 | `/assets`   | Generates favicons, icons, and banner from your logomark                     | Once when logomark is ready; re-run after logomark changes |
