@@ -12,7 +12,7 @@ I'm Luke Hanner — a solo founder who ships AI-assisted tools fast. songfor.me 
      If mode is standalone-*:       basePath must be absent from next.config.ts. -->
 
 mode: standalone-domain
-url: https://songfor.me
+url: https://songfor.gift
 basePath:
 
 ## Stack

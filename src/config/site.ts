@@ -4,7 +4,7 @@
 export const site = {
   name: 'songfor.me',
   shortName: 'songfor.me',
-  url: 'https://songfor.me',
+  url: 'https://songfor.gift',
   description:
     "Make a personalized birthday song in minutes. Tell us their quirks, inside jokes, and vibe — we'll deliver a one-of-a-kind song they'll never forget.",
   ogTitle: "songfor.me — A Birthday Song They'll Never Forget",
