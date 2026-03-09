@@ -1,4 +1,17 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import EmailSignup from '@/components/email-signup';
+import { site } from '@/config/site';
+
+export const metadata: Metadata = {
+  title: site.ogTitle,
+  description: site.description,
+  openGraph: {
+    title: site.ogTitle,
+    description: site.ogDescription,
+    url: site.url,
+  },
+};
 
 export default function Home() {
   return (
@@ -7,19 +20,19 @@ export default function Home() {
         <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
           Make them a birthday song they&apos;ll never forget.
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted">
-          Tell us about them. We&apos;ll write the lyrics, compose the music, and
-          deliver a one-of-a-kind song in minutes.
+        <p className="text-muted mx-auto mt-6 max-w-2xl text-lg">
+          Tell us about them. We&apos;ll write the lyrics, compose the music, and deliver a
+          one-of-a-kind song in minutes.
         </p>
         <div className="mt-10">
-          <a
+          <Link
             href="/create"
-            className="inline-block rounded-full bg-accent px-8 py-4 text-lg font-semibold text-white shadow-lg transition-opacity hover:opacity-90"
+            className="bg-accent inline-block rounded-full px-8 py-4 text-lg font-semibold text-white shadow-lg transition-opacity hover:opacity-90"
           >
             Start their song &rarr;
-          </a>
+          </Link>
         </div>
-        <p className="mt-4 text-sm text-muted">$9.99 &middot; delivered in ~15 minutes</p>
+        <p className="text-muted mt-4 text-sm">$9.99 &middot; delivered in ~15 minutes</p>
       </section>
 
       <EmailSignup />

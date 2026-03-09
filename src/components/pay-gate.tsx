@@ -93,6 +93,9 @@ export default function PayGate({ children, valueProposition, price, checkoutUrl
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        // Checkout returned an error — re-enable button so user can retry
+        setLoading(false);
       }
     } catch {
       setLoading(false);
@@ -102,15 +105,15 @@ export default function PayGate({ children, valueProposition, price, checkoutUrl
   if (hasPaid) return <>{children}</>;
 
   return (
-    <div className="mx-auto max-w-md border-2 border-border p-8 text-center">
+    <div className="border-border mx-auto max-w-md border-2 p-8 text-center">
       <h3 className="font-heading text-xl font-semibold">{valueProposition}</h3>
-      <p className="mt-4 font-mono text-sm text-muted">
+      <p className="text-muted mt-4 font-mono text-sm">
         One-time payment. No account required. Works instantly.
       </p>
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="mt-6 h-12 w-full rounded-none bg-accent px-8 font-mono text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
+        className="bg-accent mt-6 h-12 w-full rounded-none px-8 font-mono text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
       >
         {loading ? 'Redirecting...' : `Pay ${price}`}
       </button>

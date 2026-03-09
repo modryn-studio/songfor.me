@@ -36,5 +36,6 @@
     "prettier": "3.8.1",
     "prettier-plugin-tailwindcss": "0.7.2",
     "typescript": "5.9.3"
-  }
+  },
+  "description": "Personalized birthday song generator. Tell us their quirks, inside jokes, and vibe  we deliver a one-of-a-kind song in minutes."
 }

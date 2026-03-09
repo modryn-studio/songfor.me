@@ -2,7 +2,13 @@
 
 ## Who I Am
 
-I'm Luke Hanner — a solo founder who ships AI-assisted tools fast. songfor.me is a personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, quirks, inside jokes, and preferred vibe. Songs are manually generated on Suno V5 (concierge model) and delivered via a shareable song page with email notification. Target user: impulse gifters — a mom, dad, or friend who just realized someone's birthday is today and wants to give something personal, not generic. $9.99/song, delivered in ~15 minutes.
+I'm Luke Hanner — a solo founder building songfor.me, a personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, quirks, inside jokes, and preferred vibe and genre. Claude generates custom lyrics and a Suno style string. Songs are manually generated on Suno V5 (concierge model) and delivered via a shareable song page with email notification. $9.99/song, delivered in ~15 minutes.
+
+**Why it works:** A song is the only gift that lives inside someone. Not on a shelf — in their head. The birthday girl asks to hear it again before it's over. A 6-year-old still requests his song months later. Most gifts say "I was thinking of you." A personalized song says "I _know_ you." The purchase is often impulse — the product is the opposite of impulsive. It's the most specific, personal gift you can give, and it takes five minutes to order.
+
+**Target user:** Impulse gifters — a mom, dad, or friend who just realized someone's birthday is today and wants to give something personal, not generic. "Impulse gifter" describes the distribution moment (when they buy). The deeper driver: they want to be the person who gave the gift everyone's still talking about. The song that plays at the party, stops the room, gets stuck in everyone's head.
+
+**The methodology is the IP:** The founder has been making personalized songs for years. People started asking him to make songs for their own people — that accumulated demand made this a product. The system for drawing out personal details (inside jokes, memories, quirks) and translating them into lyrics that actually land is encoded in Claude system prompts at `/content/prompts/`.
 
 ## Deployment
 
