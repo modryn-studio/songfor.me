@@ -1,6 +1,6 @@
 # Monetization & Distribution Strategy
 
-Validated March 2, 2026. This is the operating playbook for every tool shipped from the trend-detector pipeline.
+Validated March 2, 2026. This is the operating playbook for every tool shipped from Modryn Studio.
 
 ---
 
@@ -60,7 +60,7 @@ Tracked in GitHub issue — evaluate when any single tool crosses 50k/month cons
 
 ### 1. Reddit (primary channel)
 
-Post in the subreddit where the pain lives, not the founder subreddit. The trend-detector briefing already identifies Reddit pain posts — use those subreddits directly.
+Post in the subreddit where the pain lives, not the founder subreddit. Target subreddits should be identified during the discovery phase and stored in `context.md`.
 
 Rules:
 
@@ -73,8 +73,6 @@ Rules:
 Store target subreddits in the tool JSON `subreddits` field so `/social` generates tailored copy per community.
 
 ### 2. Programmatic SEO (highest ceiling, slowest start)
-
-The trend-detector gives you a genuine edge: you know what people search for before pages exist.
 
 Pattern: head term + modifiers (city, experience level, variant) = hundreds of unique pages.
 
@@ -90,14 +88,14 @@ Wire the page template during the 48-hour build if applicable. Don't count on or
 
 ### 3. Building in Public on X
 
-Every briefing generates free daily content. Post the interesting one weekly:
+Post weekly — the build story, a milestone, a decision worth sharing:
 
-- "Today's trend signal: 9 breakout keywords about X. Here's what I built in 48 hours."
+- Document what you built, why, and what surprised you
 - Always attach a screenshot or GIF of the tool in action
 
 ### 4. Indie Hackers (week 2)
 
-Post-launch retrospective. The story of the system (trend-detector → 48hour build → launch) is as interesting as the tools.
+Post-launch retrospective. The build story — what you spotted, what you built, and how fast — is as interesting as the tool itself.
 
 ### Skip: Product Hunt
 
