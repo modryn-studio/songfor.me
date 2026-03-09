@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { site } from '@/config/site';
 import { SiteSchema } from '@/components/site-schema';
+import { SiteFooter } from '@/components/site-footer';
 import FeedbackWidget from '@/components/feedback-widget';
 import './globals.css';
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen antialiased">
         <SiteSchema />
         {children}
+        <SiteFooter />
         <Analytics />
         <FeedbackWidget />
       </body>

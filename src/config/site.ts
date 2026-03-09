@@ -12,6 +12,12 @@ export const site = {
     "Tell us about them — their name, their quirks, their inside jokes. We'll craft a personalized birthday song and deliver it in minutes. $9.99.",
   cta: 'Start their song for $9.99 →',
   founder: 'Luke Hanner',
+  waitlist: {
+    headline: 'Songs are coming.',
+    subheadline:
+      "We're still building. Drop your email — you'll be first when we launch, plus early-bird pricing.",
+    success: "You're on the list. We'll let you know the moment it's live.",
+  },
   accent: '#FF6B6B',
   bg: '#FFFAF5',
   social: {

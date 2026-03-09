@@ -1,10 +1,10 @@
-![Modryn Studio Boilerplate](public/brand/banner.png)
+![songfor.me](public/brand/banner.png)
 
-# Modryn Studio — Boilerplate
+# songfor.me
 
-Next.js starter for every Modryn Studio product. Pre-wired for production from day one.
+Make them a birthday song they'll never forget — delivered in minutes.
 
-→ [modrynstudio.com](https://modrynstudio.com)
+→ [songfor.gift](https://songfor.gift)
 
 ---
 
