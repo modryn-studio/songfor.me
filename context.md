@@ -1,5 +1,15 @@
 ﻿# Project Context
 
+## Philosophy
+
+A song is the only gift that lives inside someone.
+
+Not on a shelf. Not in a drawer. It gets replayed. The birthday girl asks to hear it again before it's even over. A 6-year-old demands it on every car ride months later. A stepdaughter still sings a track made for a family friend — out of nowhere, in the kitchen, years later. These songs don't expire. They don't get returned. They get stuck in people's heads because they're *about* someone the listener loves.
+
+Most gifts say "I was thinking of you." A personalized song says "I *know* you." The inside joke. The thing they always say. The memory only that room would recognize. A gift card puts a dollar value on the relationship. A song captures who the person actually is.
+
+The impulse gifter framing (below) describes *when* people buy. This is *why the product works*. Those are different things. The purchase is often impulse — the product is the opposite of impulsive. It's the most specific, personal gift you can give, and it takes five minutes to order.
+
 ## Product
 
 songfor.me — A personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, age, relationship, personality quirks, inside jokes, and preferred vibe/genre. Claude generates custom lyrics and a Suno style string. Songs are manually generated on Suno V5's web app (concierge model) and delivered via a unique shareable song page with email notification. The core promise: from impulse to sent gift in under 5 minutes of user effort, song delivered in ~15 minutes.
@@ -10,9 +20,11 @@ The core competitive advantage is the founder's battle-tested prompting system �
 
 A mom, dad, or friend who just realized someone's birthday is today (or tomorrow) and wants to give something personal, not generic. They're not planners — they're impulse gifters scrolling their phone. They'll pay $9.99 to avoid being the person who sends a gift card. They want the gift to feel like they put thought into it, even though they just remembered 20 minutes ago.
 
+Note: "impulse gifter" is the distribution moment — *when* the purchase happens. The deeper driver is wanting to be the person who gave the gift everyone's still talking about. The song that plays at the party, stops the room, gets stuck in everyone's head. That's what they're actually buying.
+
 ## Origin Story
 
-The founder has been making personalized birthday songs for family and friends for years using Suno. The first was for his wife's best friend's daughter (Monica, turning 12) — played it at her party, the room shifted, her mom started dancing when the hook hit, Monica laughed and went a little red. A 6-year-old named Lincoln (another family friend's son) still asks to hear his song months later. The founder's stepdaughter still sings a track he made for a family friend's boyfriend.
+The founder has been making personalized birthday songs for family and friends for years using Suno. The first was for his wife's best friend's daughter (Monica, turning 12) — played it at her party, the room shifted, her mom started dancing when the hook hit (*"Monica Monica, it's your day..."*), Monica laughed and went a little red. A 6-year-old named Lincoln (another family friend's son) still asks to hear his song months later. The founder's stepdaughter still sings a track he made for a family friend's boyfriend.
 
 People started asking him to make songs for their own people. That accumulated demand — combined with his optimized prompting methodology — is what made this a product. The methodology is the IP: the system for drawing out personal details (inside jokes, memories, quirks) and translating them into lyrics that actually land.
 
