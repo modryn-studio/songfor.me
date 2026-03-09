@@ -1,4 +1,4 @@
-﻿# scripts/generate-assets.ps1
+# scripts/generate-assets.ps1
 # ------------------------------------------------------------------------------
 # Generates all favicon, icon, and README banner assets from your logomark.
 # Run from the project root after cloning, and again after any logomark or
@@ -107,12 +107,12 @@ $negateFrag  = if ($isGrayscale) { @('-channel', 'RGB', '-negate') } else { @() 
 # -- icon.png - browser tab favicon --------------------------------------------
 # Transparent. No background. No compositing.
 # The browser renders it on whatever bg the OS/browser uses for tabs.
-magick $logomark -background none -trim +repage -resize 1024x1024 "src\app\icon.png"
+magick $logomark -background none -trim +repage -resize 1024x1024 -gravity Center -background none -extent 1024x1024 "src\app\icon.png"
 Write-Host "  + src/app/icon.png"
 
 # -- favicon.ico - legacy multi-resolution -------------------------------------
 # Transparent. No background.
-magick $logomark -background none -trim +repage -define icon:auto-resize=48,32,16 "src\app\favicon.ico"
+magick $logomark -background none -trim +repage -resize 256x256 -gravity Center -background none -extent 256x256 -define icon:auto-resize=48,32,16 "src\app\favicon.ico"
 Write-Host "  + src/app/favicon.ico"
 
 # -- apple-icon.png - iOS home screen ------------------------------------------
@@ -152,10 +152,13 @@ if (Test-Path $banner) {
     magick -size 1280x320 xc:"$bgColor" `
         '(' $logomark -background none -trim +repage $negateFrag -resize 160x160 ')' `
         -gravity West -geometry +100+0 -composite `
-        -gravity West -font "Arial-Bold" -pointsize 72 -fill "#e5e5e5" -annotate +300+0 $siteName `
+        -gravity West -font "Arial-Bold" -pointsize 72 -fill "#1C1410" -annotate +300+0 $siteName `
         $banner
     Write-Host "  + public/brand/banner.png (auto-generated)"
 }
+
+# -- palette.png - brand color swatches ----------------------------------------
+& "$PSScriptRoot\generate-palette.ps1"
 
 Write-Host ""
 Write-Host "  Done." -ForegroundColor Green
