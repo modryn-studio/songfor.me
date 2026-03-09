@@ -10,10 +10,18 @@ The core competitive advantage is the founder's battle-tested prompting system �
 
 A mom, dad, or friend who just realized someone's birthday is today (or tomorrow) and wants to give something personal, not generic. They're not planners — they're impulse gifters scrolling their phone. They'll pay $9.99 to avoid being the person who sends a gift card. They want the gift to feel like they put thought into it, even though they just remembered 20 minutes ago.
 
+## Origin Story
+
+The founder has been making personalized birthday songs for family and friends for years using Suno. The first was for his wife's best friend's daughter (Monica, turning 12) — played it at her party, the room shifted, her mom started dancing when the hook hit, Monica laughed and went a little red. A 6-year-old named Lincoln (another family friend's son) still asks to hear his song months later. The founder's stepdaughter still sings a track he made for a family friend's boyfriend.
+
+People started asking him to make songs for their own people. That accumulated demand — combined with his optimized prompting methodology — is what made this a product. The methodology is the IP: the system for drawing out personal details (inside jokes, memories, quirks) and translating them into lyrics that actually land.
+
+---
+
 ## Deployment
 
 mode: standalone-domain
-url: https://songfor.me
+url: https://songfor.gift
 basePath:
 
 Note: songfor.me is a standalone domain — it earns this exception per the domain strategy because it's a B2C gifting brand where the URL is part of the emotional product experience. "modrynstudio.com/tools/songfor" kills the magic. Still wired into shared Resend email list (segmented as "songfor") and shared GA4 analytics.
