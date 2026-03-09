@@ -22,7 +22,6 @@ function track(eventName: string, props?: EventProps): void {
 // Pattern: namedAction: (props: { ... }) => track('event_name', props)
 export const analytics = {
   track,
-  newsletterSignup: () => track('newsletter_signup'),
+  newsletterSignup: (props?: { source?: string }) => track('newsletter_signup', props),
   feedbackSubmit: () => track('feedback_submit'),
-  paymentGate: (action: string) => track('payment_gate', { action }),
 };

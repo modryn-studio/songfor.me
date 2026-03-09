@@ -40,8 +40,9 @@ Then:
 
 3. Create a new branch in `modryn-studio/modryn-studio-v2` named `log/YYYY-MM-DD-[slug]`.
 4. Push the draft MDX file to that branch at `content/log/YYYY-MM-DD-[slug].mdx`.
-5. Open a pull request from that branch to `main` with:
+5. Update the tool JSON — derive the tool slug from context.md's URL field (the path segment after `/tools/`). Using the GitHub MCP, fetch `content/tools/[tool-slug].json` from `modryn-studio/modryn-studio-v2` (main branch). If the file exists and is missing a `logSlug` field (or it is blank), push a commit to the PR branch that adds `"logSlug": "YYYY-MM-DD-[slug]"` to the JSON object. If the tool JSON does not exist yet (no card on the studio site), skip and note it in the PR body.
+6. Open a pull request from that branch to `main` with:
    - Title: the post title
-   - Body: "Draft log post — fill in narrative before merging."
+   - Body: "Draft log post — fill in narrative before merging.\n\nThree `<!-- TODO -->` sections to complete:\n1. After the intro — why this idea now? what triggered it?\n2. After **What shipped** — any surprises during discovery? competing products found?\n3. After **Why** — what made you believe this was the right thing to build right now?"
 
 The PR is the gate. Luke fills in the `<!-- TODO -->` sections in GitHub or by pulling modryn-studio-v2 locally, then merges when ready. Merging = publishing.
