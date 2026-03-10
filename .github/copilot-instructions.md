@@ -12,7 +12,7 @@ I'm Luke Hanner — a solo founder building songfor.me, a personalized birthday 
 
 ## Deployment
 
-<!-- Filled in by /init from context.md.
+<!-- Filled in by /setup from context.md.
      Read this before touching next.config.ts, BASE_PATH, site.ts, or any hardcoded URL.
      If mode is modryn-app:         basePath must stay set in next.config.ts.
      If mode is standalone-*:       basePath must be absent from next.config.ts. -->

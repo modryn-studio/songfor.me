@@ -5,9 +5,9 @@ description: Re-reads context.md, brand.md, and development-principles.md and ca
 agent: agent
 ---
 
-`context.md`, `brand.md`, and `development-principles.md` are the source of truth for this project. This command cascades any edits from those files into the derived files that `/init` originally populated.
+`context.md`, `brand.md`, and `development-principles.md` are the source of truth for this project. This command cascades any edits from those files into the derived files that `/setup` originally populated.
 
-Run this any time you edit `context.md` or `brand.md`. Do not run `/init` again — that re-runs setup steps (wiring components, installing packages) that should only happen once.
+Run this any time you edit `context.md` or `brand.md`. Do not run `/setup` again — that re-runs setup steps (wiring components, installing packages) that should only happen once.
 
 ---
 

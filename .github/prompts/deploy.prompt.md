@@ -11,7 +11,7 @@ This prompt runs from **the tool repo** (not modryn-studio-v2).
 Read `next.config.ts`. Check that `basePath` is set and does NOT still contain `TODO_SLUG`.
 
 If it still says `TODO_SLUG`:
-> Stop. Run `/init` first, or manually set `basePath` to `/tools/your-slug` in `next.config.ts`. The slug must match the URL field in `context.md`.
+> Stop. Run `/setup` first, or manually set `basePath` to `/tools/your-slug` in `next.config.ts`. The slug must match the URL field in `context.md`.
 
 If it's set correctly, extract the slug (the part after `/tools/`) and continue.
 

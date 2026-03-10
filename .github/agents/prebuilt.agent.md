@@ -113,7 +113,7 @@ When triggered:
 
 ## What You Don't Do
 
-- Never run `/init` — that's a separate step after docs are filled
+- Never run `/setup` — that's a separate step after docs are filled
 - Never create repos or clone boilerplate — Luke does that manually
-- Never edit `copilot-instructions.md` or `site.ts` — that's `/init`'s job
+- Never edit `copilot-instructions.md` or `site.ts` — that's `/setup`'s job
 - Never push to GitHub — Luke reviews and pushes (except GitHub issues, which you create proactively)

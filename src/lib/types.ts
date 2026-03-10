@@ -1,0 +1,37 @@
+export type OrderStatus = 'pending_payment' | 'paid' | 'generating' | 'done' | 'delivered';
+export type VibeType = 'heartfelt' | 'hype' | 'roast' | 'kids';
+
+export interface IntakeData {
+  recipientName: string;
+  age: string;
+  relationship: string;
+  quirk1: string;
+  quirk2: string;
+  quirk3: string;
+  vibe: VibeType;
+  genre: string;
+}
+
+export interface Order {
+  id: string;
+  created_at: string;
+  buyer_email: string;
+  recipient_name: string;
+  intake_data: IntakeData;
+  lyrics: string | null;
+  suno_style: string | null;
+  status: OrderStatus;
+  stripe_session_id: string | null;
+  song_id: string | null;
+}
+
+export interface Song {
+  id: string;
+  created_at: string;
+  order_id: string;
+  recipient_name: string;
+  lyrics: string;
+  suno_style: string;
+  audio_url: string | null;
+  is_public: boolean;
+}

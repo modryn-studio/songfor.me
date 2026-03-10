@@ -16,4 +16,9 @@ export const analytics = {
   track,
   newsletterSignup: (props?: { source?: string }) => track('newsletter_signup', props),
   feedbackSubmit: () => track('feedback_submit'),
+  intakeStarted: () => track('intake_started'),
+  intakeStep: (props: { step: string }) => track('intake_step', props),
+  intakeCompleted: (props: { name: string }) => track('intake_completed', props),
+  songPlayed: (props: { recipientName: string }) => track('song_played', props),
+  songShared: () => track('song_shared'),
 };

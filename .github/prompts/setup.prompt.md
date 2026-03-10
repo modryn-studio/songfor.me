@@ -1,5 +1,5 @@
 ﻿---
-name: init
+name: setup
 description: Reads context.md, development-principles.md, and brand.md, then fills in copilot-instructions.md and site.ts for a new project
 agent: agent
 ---
