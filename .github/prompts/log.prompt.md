@@ -14,6 +14,7 @@ Then:
 2. Draft a MDX post with:
    - Filename: `YYYY-MM-DD-[slug].mdx` — today's date, slug from the topic
    - Frontmatter:
+
      ```
      ---
      title: ""
@@ -23,6 +24,7 @@ Then:
      description: ""
      ---
      ```
+
      The `tag` field must be exactly one of these four values:
      - `launch` — first public post about a tool (new product announcement, v1/v2 ship)
      - `build` — work-in-progress updates, decisions, system/architecture posts, how-I-work posts
@@ -32,6 +34,7 @@ Then:
      The `seoTitle` is the `<title>` tag. Format: `[descriptive hook] | Build Log`. 50–70 characters. More specific than the post title — lead with the outcome or insight, not the project name.
 
      The `description` is the meta description. 110–160 characters. What happened and why it matters.
+
    - Post body:
 
      **What shipped** — bullet list of the 3–5 most significant things as human outcomes. Not "feat: add X" but "X is now live".

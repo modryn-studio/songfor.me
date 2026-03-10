@@ -1,6 +1,6 @@
 ---
 name: tool
-description: "Register or update a tool on modrynstudio.com via PR."
+description: 'Register or update a tool on modrynstudio.com via PR.'
 agent: agent
 ---
 
@@ -30,6 +30,7 @@ Ask for the following if not already provided:
 11. **Target subreddits** — (optional) 2–4 subreddits where the tool's target users hang out. Used by the `/social` prompt for launch-day distribution. Don't include r/SideProject (always included as founder channel). Example: `["r/webdev", "r/freelance"]`
 
 Then:
+
 - Derive the slug from the name (lowercase, spaces → hyphens, strip special chars)
 - Check if `content/tools/<slug>.json` already exists on `modryn-studio/modryn-studio-v2` main branch using the GitHub MCP
 - If it exists: update the file with the new values

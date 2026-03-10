@@ -4,6 +4,7 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { site } from '@/config/site';
 import { SiteSchema } from '@/components/site-schema';
 import { SiteFooter } from '@/components/site-footer';
+import { PostHogProvider } from '@/components/posthog-provider';
 import FeedbackWidget from '@/components/feedback-widget';
 import './globals.css';
 
@@ -37,11 +38,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
-        <SiteSchema />
-        {children}
-        <SiteFooter />
-        <Analytics />
-        <FeedbackWidget />
+        <PostHogProvider>
+          <SiteSchema />
+          {children}
+          <SiteFooter />
+          <Analytics />
+          <FeedbackWidget />
+        </PostHogProvider>
       </body>
       {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
