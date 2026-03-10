@@ -32,7 +32,8 @@ basePath:
 - Lucide React for icons
 - clsx + tailwind-merge for class utilities
 - Vercel for deployment (Pro plan — commercial use)
-- GA4 for custom event tracking (via `@/lib/analytics.ts` — never call `gtag()` directly)
+- GA4 + PostHog for custom event tracking (via `@/lib/analytics.ts` — never call `gtag()` or `posthog.capture()` directly)
+- PostHog provider (`PostHogProvider`) wraps `layout.tsx` — pageviews proxied via `/ingest`
 - Vercel Analytics `<Analytics />` component in `layout.tsx` for pageviews only — do not use their `track()` API
 - **Planned (not yet installed):** Supabase (Postgres DB + Storage for orders, songs, MP3s), Claude API / Anthropic SDK (conversational intake + lyrics generation)
 
@@ -203,7 +204,7 @@ export async function POST(req: Request): Promise<Response> {
 
 ## Analytics
 
-All custom events MUST go through `analytics` from `@/lib/analytics.ts` — never call `gtag()` directly.
+All custom events MUST go through `analytics` from `@/lib/analytics.ts` — never call `gtag()` or `posthog.capture()` directly.
 
 ```typescript
 import { analytics } from '@/lib/analytics';
@@ -214,6 +215,7 @@ Add a named method to `analytics.ts` for each distinct user action. Named method
 discoverable — no magic strings scattered across 10 files.
 
 GA4 measurement ID is loaded via `NEXT_PUBLIC_GA_MEASUREMENT_ID` in `layout.tsx`.
+PostHog key is loaded via `NEXT_PUBLIC_POSTHOG_KEY` — same key used across all Modryn Studio projects.
 
 ## Dev Server
 
