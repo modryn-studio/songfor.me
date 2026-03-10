@@ -100,6 +100,9 @@ export async function POST(req: Request): Promise<Response> {
             email: body.email!,
             unsubscribed: false,
             ...(segmentId && { segments: [{ id: segmentId }] }),
+            // Tag source so contacts from this site are filterable in the
+            // shared modrynstudio Resend audience
+            properties: { source: 'songfor.me' },
           });
           log.info(ctx.reqId, 'Resend contact created', { segmentId });
         } catch (resendError) {
