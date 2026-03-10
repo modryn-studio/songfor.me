@@ -138,9 +138,11 @@ Wire `PostHogProvider`, `FeedbackWidget`, and analytics into `src/app/layout.tsx
   ```
 - Add `<GoogleAnalytics>` **outside** `<body>` but inside `<html>`, conditioned on the env var:
   ```tsx
-  {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-    <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
-  )}
+  {
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+    );
+  }
   ```
   Do NOT use raw `<script>` tags for GA — `GoogleAnalytics` from `@next/third-parties/google` is the correct Next.js 15/16 approach.
 - The widget uses CSS custom properties (`--color-border`, `--color-surface`, `--color-accent`, etc.).
