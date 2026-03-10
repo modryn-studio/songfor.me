@@ -19,12 +19,19 @@ Then:
      title: ""
      date: "YYYY-MM-DD"
      tag: ""
+     seoTitle: ""
+     description: ""
      ---
      ```
-     The `tag` field must be the project slug. Use:
-     - `meta` — process/workflow/how-I-work posts
-     - the project slug (e.g. `project-loom`, `trend-detector`) — for anything specific to this project
-         Ask Luke which tag to use if it isn't obvious.
+     The `tag` field must be exactly one of these four values:
+     - `launch` — first public post about a tool (new product announcement, v1/v2 ship)
+     - `build` — work-in-progress updates, decisions, system/architecture posts, how-I-work posts
+     - `milestone` — significant pipeline or infrastructure milestone (e.g. "pipeline is running", "briefings are public")
+     - `learning` — reflections, lessons learned, post-mortems
+
+     The `seoTitle` is the `<title>` tag. Format: `[descriptive hook] | Build Log`. 50–70 characters. More specific than the post title — lead with the outcome or insight, not the project name.
+
+     The `description` is the meta description. 110–160 characters. What happened and why it matters.
    - Post body:
 
      **What shipped** — bullet list of the 3–5 most significant things as human outcomes. Not "feat: add X" but "X is now live".
