@@ -176,9 +176,7 @@ src/config/
 src/lib/
 ├── cn.ts                          ← Tailwind class merge utility
 ├── route-logger.ts                ← API route logging (createRouteLogger)
-└── analytics.ts                   ← GA4 + PostHog event tracking (analytics.track)
-src/components/
-└── posthog-provider.tsx           ← PostHog provider + pageview tracking (wraps layout)
+└── analytics.ts                   ← Vercel Analytics event tracking (analytics.track)
 scripts/
 └── generate-assets.ps1            ← Asset generator (run via /assets)
 context.md                         ← SOURCE OF TRUTH: product, stack, routes, monetization

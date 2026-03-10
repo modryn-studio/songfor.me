@@ -101,7 +101,7 @@ Post in this order, 30–60 min apart:
 3. **Indie Hackers** — Brief show-and-tell post in the Products section.
 
 ### Week 1 — Compound
-1. **Monitor GA4** — Check which channels drove actual signups/usage, not just pageviews.
+1. **Monitor Vercel Analytics** — Check which channels drove actual signups/usage, not just pageviews. Dashboard: Vercel → project → Analytics tab.
 2. **pSEO seed** — If the product has comparison or "best X for Y" potential, create 1–2 programmatic pages. These take 2–4 months to rank but compound. Don't skip this step.
 3. **Hacker News** — Only if you have a genuine technical insight to share (not a product plug). "Show HN" with a paragraph about the interesting technical decision, link to the tool.
 
