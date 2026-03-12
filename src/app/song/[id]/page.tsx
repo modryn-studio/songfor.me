@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import { site } from '@/config/site';
 import type { Song } from '@/lib/types';
+import FeedbackWidget from '@/components/feedback-widget';
 import SongPlayer from './song-player';
 
 export async function generateMetadata({
@@ -71,7 +72,8 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
   const sections = parseLyrics(song.lyrics);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+    <>
+      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
       {/* Header */}
       <div className="mb-8 text-center sm:mb-10">
         <p className="text-muted mb-2 text-sm font-medium tracking-widest uppercase">
@@ -132,5 +134,7 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
         </a>
       </div>
     </main>
+    <FeedbackWidget />
+    </>
   );
 }

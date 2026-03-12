@@ -3,7 +3,6 @@ import { Analytics } from '@vercel/analytics/next';
 import { site } from '@/config/site';
 import { SiteSchema } from '@/components/site-schema';
 import { SiteFooter } from '@/components/site-footer';
-import FeedbackWidget from '@/components/feedback-widget';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -40,7 +39,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <SiteFooter />
         <Analytics />
-        <FeedbackWidget />
       </body>
     </html>
   );

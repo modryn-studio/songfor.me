@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import { site } from '@/config/site';
+import FeedbackWidget from '@/components/feedback-widget';
 import ConfirmedContent from './page-content';
 
 export const metadata: Metadata = {
@@ -33,5 +34,10 @@ export default async function ConfirmedPage({
     await db.from('orders').update({ status: 'paid' }).eq('id', order_id);
   }
 
-  return <ConfirmedContent email={order.buyer_email} name={order.recipient_name} />;
+  return (
+    <>
+      <ConfirmedContent email={order.buyer_email} name={order.recipient_name} />
+      <FeedbackWidget />
+    </>
+  );
 }

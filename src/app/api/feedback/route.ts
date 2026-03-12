@@ -85,6 +85,8 @@ export async function POST(req: Request): Promise<Response> {
       to: feedbackTo,
       subject: subjectMap[body.type],
       html: buildHtml(body),
+      // replyTo lets you hit Reply in Gmail and go straight to the user
+      ...(hasEmail && { replyTo: body.email }),
     });
 
     log.info(ctx.reqId, 'Email sent', { to: feedbackTo });
