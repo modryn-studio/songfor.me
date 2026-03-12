@@ -83,7 +83,7 @@ export async function POST(req: Request): Promise<Response> {
 
     // Send delivery email via Resend
     const resendKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'songs@songfor.gift';
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'songfor.me <hello@modrynstudio.com>';
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://songfor.gift';
 
     if (resendKey) {
