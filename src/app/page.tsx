@@ -26,13 +26,13 @@ export default function Home() {
         </p>
         <div className="mt-10">
           <Link
-            href="/create"
+            href="#signup"
             className="bg-accent inline-block rounded-full px-8 py-4 text-lg font-semibold text-white shadow-lg transition-opacity hover:opacity-90"
           >
-            Start their song &rarr;
+            Get first access &rarr;
           </Link>
         </div>
-        <p className="text-muted mt-4 text-sm">$9.99 &middot; delivered in ~15 minutes</p>
+        <p className="text-muted mt-4 text-sm">Prelaunch list open now &middot; first drops soon</p>
       </section>
 
       <EmailSignup />

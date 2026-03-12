@@ -92,6 +92,22 @@ Previous versions (for reference if encountering legacy content):
 - `/privacy` → Auto-generated.
 - `/terms` → Auto-generated.
 
+## Minimum Money Loop
+
+The minimum sequence that results in money changing hands. Wire every step end-to-end before polishing any individual step. One real order through the whole system is the only milestone that matters in Phase 4.
+
+```
+Landing page (leave it) →
+/create intake (Claude) →
+Stripe checkout ($9.99) →
+Admin sees new order →
+Admin uploads MP3 →
+Resend email to buyer →
+/song/[id] shareable page
+```
+
+**Rule:** Do not polish any one piece until this loop has run once with a real order.
+
 ## Product North Star
 
 "Send the Moment" — A birthday song triggered by a memory or impulse.
@@ -116,10 +132,10 @@ Reddit is hostile to AI product promotion. Existing posts about AI birthday song
 
 **Approach: Organic storytelling, not product drops.** Post about the reaction, not the product. "I surprised my dad with a personalized birthday song and he cried" → people ask "how?" → you answer in comments. Never lead with the URL.
 
-- r/CasualConversation — PRIMARY. Wholesome stories land well here. "I made my friend cry with a birthday song" format. High engagement, low spam suspicion.
+- \*\*\* r/CasualConversation — PRIMARY. Wholesome stories land well here. "I made my friend cry with a birthday song" format. High engagement, low spam suspicion.
 - r/Mommit (555K weekly visitors) — Story-driven: "My kid has been singing his birthday song for 3 days straight." Moms share emotional moments organically. Never pitch — just share the moment.
 - r/Parenting (1.3M weekly visitors) — Same approach. "How I solved the last-minute birthday gift problem" as genuine advice, not promotion.
-- r/GiftIdeas (54K weekly visitors) — CAUTION. This sub actively downvotes AI product posts. Only engage by answering existing "looking for unique gift" threads in comments, never as a top-level post.
+- \*\*\*\* r/GiftIdeas (54K weekly visitors) — CAUTION. This sub actively downvotes AI product posts. Only engage by answering existing "looking for unique gift" threads in comments, never as a top-level post.
 
 **Anti-pattern:** Do NOT post "I built a tool that makes birthday songs" — this gets flagged as self-promotion and downvoted immediately (validated by existing posts getting 0 upvotes and "Ew no thanks" responses).
 
@@ -147,6 +163,7 @@ Reddit is hostile to AI product promotion. Existing posts about AI birthday song
 11. **Price is the demand lever.** When manual fulfillment capacity is exceeded, raise the price ($9.99 → $14.99 → $24.99). Don't hire or build faster — charge more. Demand tells you where the ceiling is. This is the concierge model's built-in scaling mechanism.
 12. **Competition validates the market — and the gap is real.** Songful ($49/song, 2,400+ reviews, 4.97 stars) is the market leader — proof that people pay real money for personalized songs and cry happy tears when they receive them. BirthdaySongMaker ($9.99/song) is the budget player, heavy on SEO, light on personalization. CustomBdaySong ($4/song) is the indie entry with weak brand. SendFame (1M+ users) is a general AI content platform, not birthday-specific. All competitors use form-based intake: name, genre, occasion, done. None do conversational intake. None capture the story — the quirks, the inside jokes, the "things that are so them." The moat is prompt depth + founder's prompting methodology, not technology. Think Pepsi vs Coke: Songful is the premium incumbent. songfor.me is the faster, more personal, more accessible challenger at 1/5 the price with deeper personalization. Competition means the market is proven — not that it's closed.
 13. **Data flywheel instrumentation.** Log every generation from day one: full intake inputs, Claude system prompt version used, Claude output (lyrics + style string), Suno parameters used, generation time, whether the song was downloaded, whether the shareable link was visited (and how many times), and any qualitative feedback. Over time this reveals patterns: "roast songs for dads over 50 work best in country/folk", "kids songs need BPM 90-110 and simple rhymes." This data is the moat that compounds.
+14. **No lyric approval step.** The buyer doesn't tell the chef what ingredients to use. The conversational intake captures enough personal detail that the lyrics should land without editing. If they don't, the intake failed — fix the intake, not the output. A lyric review step also breaks the impulse flow: the user is done after payment. They go about their day, song arrives, they forward it. Adding friction after payment contradicts the product's core promise. Songful needs lyric approval because their form-based intake produces thin, generic output. Ours shouldn't.
 
 ## GitHub Issues Parking Lot
 

@@ -2,25 +2,27 @@ import type { Metadata } from 'next';
 import { site } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: `Privacy Policy — ${site.name}`,
-  description: `Privacy policy for ${site.name}.`,
+  title: `Privacy Policy — ${site.name} Birthday Song Generator`,
+  description:
+    'How songfor.me handles your data. We only use your personal information to create and deliver your personalized birthday song.',
 };
 
 export default function PrivacyPage() {
   const effectiveDate = 'March 9, 2026';
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
-      <h1 className="font-heading mb-2 text-3xl font-semibold">Privacy Policy</h1>
+    <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+      <h1 className="font-heading mb-2 text-3xl font-semibold sm:text-4xl">Privacy Policy</h1>
       <p className="text-muted mb-10 text-sm">Effective {effectiveDate}</p>
 
-      <div className="text-text space-y-8 text-base leading-relaxed">
+      <div className="text-text space-y-8 text-[15px] leading-relaxed sm:text-base">
         <section>
           <h2 className="font-heading mb-2 text-xl font-semibold">What we collect</h2>
           <p>
             When you order a song, we collect your email address, the recipient&apos;s name, and the
-            personal details you share during the intake (age, relationship, quirks, vibe, genre).
-            We use this information only to create your song and deliver it to you.
+            personal details you share during intake (for example: nickname, age, people to mention,
+            inside jokes, vibe, and music references). We use this information only to create your
+            song and deliver it to you.
           </p>
         </section>
 

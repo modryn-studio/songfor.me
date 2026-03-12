@@ -4,14 +4,18 @@ import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/cn';
 import { analytics } from '@/lib/analytics';
 import type { VibeType } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 type StepId =
   | 'name'
+  | 'nickname'
   | 'age'
-  | 'relationship'
-  | 'quirks'
+  | 'innerCircle'
+  | 'details'
   | 'vibe'
-  | 'genre'
+  | 'music'
   | 'email'
   | 'generating';
 
@@ -22,25 +26,101 @@ interface Message {
 
 interface IntakeState {
   name: string;
+  nickname: string;
   age: string;
-  relationship: string;
-  quirk1: string;
-  quirk2: string;
-  quirk3: string;
+  innerCircle: string;
+  insideJoke: string;
+  recentContext: string;
+  personalityTrait: string;
   vibe: VibeType;
-  genre: string;
+  musicReference: string;
   email: string;
 }
 
-const RELATIONSHIP_OPTIONS = [
-  'Friend',
-  'Partner',
-  'Parent',
-  'Sibling',
-  'Child',
-  'Coworker',
-  'Other',
-];
+// ── Quality scoring ─────────────────────────────────────────────────────────
+
+function calcQualityScore({
+  nickname,
+  innerCircle,
+  insideJoke,
+  recentContext,
+  personalityTrait,
+  musicReference,
+}: {
+  nickname: string;
+  innerCircle: string;
+  insideJoke: string;
+  recentContext: string;
+  personalityTrait: string;
+  musicReference: string;
+}): number {
+  let score = 0;
+
+  if (nickname) score += 8;
+
+  if (innerCircle) {
+    score += 15;
+    if (innerCircle.length > 50) score += 5;
+    if (innerCircle.length > 100) score += 5;
+  }
+
+  if (insideJoke) {
+    score += 20;
+    if (insideJoke.length > 30) score += 5;
+    if (insideJoke.length > 80) score += 5;
+  }
+
+  if (recentContext) {
+    score += 12;
+    if (recentContext.length > 50) score += 3;
+  }
+
+  if (personalityTrait) score += 8;
+  if (musicReference) score += 15;
+
+  return Math.min(score, 100);
+}
+
+function QualityRing({ score }: { score: number }) {
+  const radius = 18;
+  const circ = 2 * Math.PI * radius;
+  const fill = (score / 100) * circ;
+  const color = score >= 70 ? '#4ade80' : score >= 40 ? '#fbbf24' : '#ff6b6b';
+  const label =
+    score >= 70
+      ? 'This already feels personal'
+      : score >= 40
+        ? 'Great start - add one more detail'
+        : 'A few more details will make this hit';
+
+  return (
+    <div className="flex flex-col items-center gap-0.5" title={label}>
+      <div className="relative h-11 w-11">
+        <svg className="-rotate-90" width="44" height="44" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r={radius} fill="none" stroke="#e8ded6" strokeWidth="3.5" />
+          <circle
+            cx="22"
+            cy="22"
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth="3.5"
+            strokeDasharray={`${fill} ${circ}`}
+            strokeLinecap="round"
+            style={{ transition: 'stroke-dasharray 0.4s ease, stroke 0.4s ease' }}
+          />
+        </svg>
+        <span
+          className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold"
+          style={{ color }}
+        >
+          {score}%
+        </span>
+      </div>
+      <span className="text-muted max-w-20 text-center text-[9px] leading-tight">{label}</span>
+    </div>
+  );
+}
 
 const VIBE_OPTIONS = [
   { value: 'heartfelt' as VibeType, label: 'Heartfelt', emoji: '🥺', desc: 'touching, genuine' },
@@ -49,24 +129,33 @@ const VIBE_OPTIONS = [
   { value: 'kids' as VibeType, label: 'Kids Bop', emoji: '🎈', desc: 'for little ones' },
 ];
 
-const GENRE_OPTIONS = ['Pop', 'Country', 'Hip-Hop', 'Folk', 'R&B', 'Rock', 'Surprise me'];
-
-const STEP_ORDER: StepId[] = ['name', 'age', 'relationship', 'quirks', 'vibe', 'genre', 'email'];
+const STEP_ORDER: StepId[] = [
+  'name',
+  'nickname',
+  'age',
+  'innerCircle',
+  'details',
+  'vibe',
+  'music',
+  'email',
+];
 
 function getBotQuestion(step: StepId, name: string): string {
   switch (step) {
     case 'name':
       return "Let's make them a birthday song. Who is it for?";
+    case 'nickname':
+      return `Does ${name} have a nickname? If so, drop it here — it might end up in the chorus.`;
     case 'age':
       return `How old is ${name} turning?`;
-    case 'relationship':
-      return `What's your relationship with ${name}?`;
-    case 'quirks':
-      return `Tell me 3 things that are SO ${name}. The more specific, the better — an inside joke, something they always say, a memory only you'd know.`;
+    case 'innerCircle':
+      return `Who are you to ${name}, and who else should we name-drop? List your relationship, plus their partner, kids, friends, pets — anyone important.`;
+    case 'details':
+      return `What's the plan for ${name}'s birthday — and what makes them them?`;
     case 'vibe':
       return `What vibe should ${name}'s song have?`;
-    case 'genre':
-      return `What genre feels like ${name}?`;
+    case 'music':
+      return `What should ${name}'s song sound like?`;
     case 'email':
       return `Last thing — where should we send the song when it's ready?`;
     default:
@@ -81,10 +170,22 @@ export default function CreateContent() {
   ]);
   const [answers, setAnswers] = useState<Partial<IntakeState>>({});
   const [textInput, setTextInput] = useState('');
-  const [quirk1, setQuirk1] = useState('');
-  const [quirk2, setQuirk2] = useState('');
-  const [quirk3, setQuirk3] = useState('');
+  const [detail1, setDetail1] = useState('');
+  const [detail2, setDetail2] = useState('');
+  const [detail3, setDetail3] = useState('');
+  const [musicInput, setMusicInput] = useState('');
+  const [nicknameSkipAttempted, setNicknameSkipAttempted] = useState(false);
   const [error, setError] = useState('');
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+  const qualityScore = calcQualityScore({
+    nickname: answers.nickname ?? '',
+    innerCircle: answers.innerCircle ?? '',
+    insideJoke: detail1,
+    recentContext: detail2,
+    personalityTrait: detail3,
+    musicReference: musicInput,
+  });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +195,27 @@ export default function CreateContent() {
 
   useEffect(() => {
     analytics.intakeStarted();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const viewport = window.visualViewport;
+
+    const updateKeyboardOffset = () => {
+      const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      // Ignore small browser chrome shifts that are not the keyboard.
+      setKeyboardOffset(offset > 120 ? offset : 0);
+    };
+
+    updateKeyboardOffset();
+    viewport.addEventListener('resize', updateKeyboardOffset);
+    viewport.addEventListener('scroll', updateKeyboardOffset);
+
+    return () => {
+      viewport.removeEventListener('resize', updateKeyboardOffset);
+      viewport.removeEventListener('scroll', updateKeyboardOffset);
+    };
   }, []);
 
   function pushMessage(msg: Message) {
@@ -119,11 +241,27 @@ export default function CreateContent() {
     }
     setAnswers((p) => ({ ...p, name }));
     pushMessage({ role: 'user', text: name });
-    setTimeout(() => pushMessage({ role: 'bot', text: getBotQuestion('age', name) }), 400);
-    setStep('age');
+    setTimeout(() => pushMessage({ role: 'bot', text: getBotQuestion('nickname', name) }), 400);
+    setStep('nickname');
     setTextInput('');
     setError('');
     analytics.intakeStep({ step: 'name' });
+  }
+
+  function handleNicknameSubmit(skip = false) {
+    const nickname = skip ? '' : textInput.trim();
+    if (!skip && !nickname) {
+      setError('Type a nickname or hit Skip.');
+      return;
+    }
+    if (skip && !nicknameSkipAttempted) {
+      setNicknameSkipAttempted(true);
+      setError('');
+      return;
+    }
+    setAnswers((p) => ({ ...p, nickname }));
+    advance('age', skip ? '(no nickname)' : nickname);
+    analytics.intakeStep({ step: 'nickname' });
   }
 
   function handleAgeSubmit() {
@@ -133,34 +271,40 @@ export default function CreateContent() {
       return;
     }
     setAnswers((p) => ({ ...p, age }));
-    advance('relationship', age);
+    advance('innerCircle', age);
     analytics.intakeStep({ step: 'age' });
   }
 
-  function handleRelationshipSelect(rel: string) {
-    setAnswers((p) => ({ ...p, relationship: rel }));
-    pushMessage({ role: 'user', text: rel });
-    setTimeout(
-      () => pushMessage({ role: 'bot', text: getBotQuestion('quirks', answers.name ?? '') }),
-      400
-    );
-    setStep('quirks');
-    setError('');
-    analytics.intakeStep({ step: 'relationship' });
-  }
-
-  function handleQuirksSubmit() {
-    const q1 = quirk1.trim();
-    if (!q1) {
-      setError("Add at least one thing that's so them.");
+  function handleInnerCircleSubmit() {
+    const innerCircle = textInput.trim();
+    if (!innerCircle) {
+      setError('List at least one person or pet — this is what makes the song personal.');
       return;
     }
-    const parts = [q1, quirk2.trim(), quirk3.trim()].filter(Boolean);
+    setAnswers((p) => ({ ...p, innerCircle }));
+    pushMessage({ role: 'user', text: innerCircle });
+    setTimeout(
+      () => pushMessage({ role: 'bot', text: getBotQuestion('details', answers.name ?? '') }),
+      400
+    );
+    setStep('details');
+    setTextInput('');
+    setError('');
+    analytics.intakeStep({ step: 'innerCircle' });
+  }
+
+  function handleDetailsSubmit() {
+    const d1 = detail1.trim();
+    if (!d1) {
+      setError('Give us at least one detail — this is what makes the song hit.');
+      return;
+    }
+    const parts = [d1, detail2.trim(), detail3.trim()].filter(Boolean);
     setAnswers((p) => ({
       ...p,
-      quirk1: q1,
-      quirk2: quirk2.trim(),
-      quirk3: quirk3.trim(),
+      insideJoke: d1,
+      recentContext: detail2.trim(),
+      personalityTrait: detail3.trim(),
     }));
     pushMessage({ role: 'user', text: parts.join(' · ') });
     setTimeout(
@@ -169,7 +313,7 @@ export default function CreateContent() {
     );
     setStep('vibe');
     setError('');
-    analytics.intakeStep({ step: 'quirks' });
+    analytics.intakeStep({ step: 'details' });
   }
 
   function handleVibeSelect(vibe: VibeType) {
@@ -177,24 +321,29 @@ export default function CreateContent() {
     setAnswers((p) => ({ ...p, vibe }));
     pushMessage({ role: 'user', text: label });
     setTimeout(
-      () => pushMessage({ role: 'bot', text: getBotQuestion('genre', answers.name ?? '') }),
+      () => pushMessage({ role: 'bot', text: getBotQuestion('music', answers.name ?? '') }),
       400
     );
-    setStep('genre');
+    setStep('music');
     setError('');
     analytics.intakeStep({ step: 'vibe' });
   }
 
-  function handleGenreSelect(genre: string) {
-    setAnswers((p) => ({ ...p, genre }));
-    pushMessage({ role: 'user', text: genre });
+  function handleMusicSubmit() {
+    const music = musicInput.trim();
+    if (!music) {
+      setError('Give us something to work with — an artist, song, or genre.');
+      return;
+    }
+    setAnswers((p) => ({ ...p, musicReference: music }));
+    pushMessage({ role: 'user', text: music });
     setTimeout(
       () => pushMessage({ role: 'bot', text: getBotQuestion('email', answers.name ?? '') }),
       400
     );
     setStep('email');
     setError('');
-    analytics.intakeStep({ step: 'genre' });
+    analytics.intakeStep({ step: 'music' });
   }
 
   async function handleEmailSubmit() {
@@ -225,13 +374,14 @@ export default function CreateContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipientName: finalAnswers.name,
+          nickname: finalAnswers.nickname,
           age: finalAnswers.age,
-          relationship: finalAnswers.relationship,
-          quirk1: finalAnswers.quirk1,
-          quirk2: finalAnswers.quirk2,
-          quirk3: finalAnswers.quirk3,
+          innerCircle: finalAnswers.innerCircle,
+          insideJoke: finalAnswers.insideJoke,
+          recentContext: finalAnswers.recentContext,
+          personalityTrait: finalAnswers.personalityTrait,
           vibe: finalAnswers.vibe,
-          genre: finalAnswers.genre,
+          musicReference: finalAnswers.musicReference,
           email: finalAnswers.email,
         }),
       });
@@ -253,14 +403,15 @@ export default function CreateContent() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 pt-8 pb-56">
-      {/* Progress bar */}
-      <div className="mb-6">
-        <div className="bg-border h-1 w-full overflow-hidden rounded-full">
+      {/* Header: progress bar + quality ring */}
+      <div className="mb-6 flex items-center gap-4">
+        <div className="bg-border h-1 flex-1 overflow-hidden rounded-full">
           <div
             className="bg-accent h-1 rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
+        {step !== 'name' && step !== 'generating' && <QualityRing score={qualityScore} />}
       </div>
 
       {/* Chat messages */}
@@ -286,75 +437,94 @@ export default function CreateContent() {
       </div>
 
       {/* Input — fixed to bottom */}
-      <div className="border-border bg-bg fixed right-0 bottom-0 left-0 border-t p-4">
+      <div
+        className="border-border bg-bg/95 fixed right-0 left-0 border-t p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur-sm"
+        style={{ bottom: keyboardOffset }}
+      >
         <div className="mx-auto max-w-2xl">
-          {(step === 'name' || step === 'age') && (
+          {(step === 'name' || step === 'age' || step === 'innerCircle') && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                step === 'name' ? handleNameSubmit() : handleAgeSubmit();
+                if (step === 'name') handleNameSubmit();
+                else if (step === 'age') handleAgeSubmit();
+                else handleInnerCircleSubmit();
               }}
               className="flex gap-2"
             >
-              <input
+              <Input
                 autoFocus
                 type="text"
                 inputMode={step === 'age' ? 'numeric' : 'text'}
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
-                placeholder={step === 'name' ? 'Their name...' : 'Their age...'}
-                className="border-border bg-surface focus:border-accent flex-1 rounded-full border px-4 py-3 text-sm outline-none"
+                placeholder={
+                  step === 'name'
+                    ? 'Their name...'
+                    : step === 'age'
+                      ? 'Their age...'
+                      : "e.g. I'm their mom. Partner: Jake. Kids: Lily, Dylan. Dog: Biscuit."
+                }
+                className="flex-1"
               />
-              <button
-                type="submit"
-                className="bg-accent rounded-full px-5 py-3 text-sm font-semibold text-white"
-              >
-                Next →
-              </button>
+              <Button type="submit">Next →</Button>
             </form>
           )}
 
-          {step === 'relationship' && (
+          {step === 'nickname' && (
             <div className="flex flex-wrap gap-2">
-              {RELATIONSHIP_OPTIONS.map((rel) => (
-                <button
-                  key={rel}
-                  onClick={() => handleRelationshipSelect(rel)}
-                  className="border-border bg-surface hover:border-accent rounded-full border px-4 py-2 text-sm transition-colors"
-                >
-                  {rel}
-                </button>
-              ))}
+              <Input
+                autoFocus
+                type="text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder={
+                  nicknameSkipAttempted
+                    ? 'Really? Not even a silly one? Nicknames make the chorus hit different.'
+                    : 'Their nickname...'
+                }
+                className="min-w-0 flex-1 basis-full sm:basis-auto"
+              />
+              <Button onClick={() => handleNicknameSubmit()}>Next →</Button>
+              <Button onClick={() => handleNicknameSubmit(true)} variant="secondary">
+                {nicknameSkipAttempted ? 'Skip anyway' : 'Skip'}
+              </Button>
             </div>
           )}
 
-          {step === 'quirks' && (
+          {step === 'details' && (
             <div className="space-y-2">
-              <input
+              <label className="text-muted block text-xs font-semibold tracking-wide uppercase">
+                Inside joke or crew phrase
+              </label>
+              <Input
                 autoFocus
-                value={quirk1}
-                onChange={(e) => setQuirk1(e.target.value)}
-                placeholder="Something they always say, a nickname, an obsession..."
-                className="border-border bg-surface focus:border-accent w-full rounded-xl border px-4 py-3 text-sm outline-none"
+                value={detail1}
+                onChange={(e) => setDetail1(e.target.value)}
+                placeholder={`e.g. "we're not in a hurry" — something only ${name}'s people would get`}
+                className="rounded-2xl"
               />
-              <input
-                value={quirk2}
-                onChange={(e) => setQuirk2(e.target.value)}
-                placeholder="An inside joke, a memory, a hobby..."
-                className="border-border bg-surface focus:border-accent w-full rounded-xl border px-4 py-3 text-sm outline-none"
+              <label className="text-muted mt-3 block text-xs font-semibold tracking-wide uppercase">
+                Birthday plan or recent life moment
+              </label>
+              <Textarea
+                value={detail2}
+                onChange={(e) => setDetail2(e.target.value)}
+                placeholder={`e.g. trampoline sleepover, escape room, cookout in the backyard — or baby on the way, just got promoted...`}
+                rows={2}
               />
-              <input
-                value={quirk3}
-                onChange={(e) => setQuirk3(e.target.value)}
-                placeholder="One more thing that's so them..."
-                className="border-border bg-surface focus:border-accent w-full rounded-xl border px-4 py-3 text-sm outline-none"
+              <label className="text-muted mt-3 block text-xs font-semibold tracking-wide uppercase">
+                Their signature energy
+              </label>
+              <Input
+                value={detail3}
+                onChange={(e) => setDetail3(e.target.value)}
+                placeholder={`e.g. makes everyone feel like the most important person in the room`}
+                className="rounded-2xl"
               />
-              <button
-                onClick={handleQuirksSubmit}
-                className="bg-accent w-full rounded-full py-3 text-sm font-semibold text-white"
-              >
+              <Button onClick={handleDetailsSubmit} className="w-full">
                 Continue →
-              </button>
+              </Button>
             </div>
           )}
 
@@ -364,7 +534,7 @@ export default function CreateContent() {
                 <button
                   key={v.value}
                   onClick={() => handleVibeSelect(v.value)}
-                  className="border-border bg-surface hover:border-accent flex flex-col items-start rounded-xl border p-3 text-left transition-colors"
+                  className="border-border bg-surface hover:border-accent flex flex-col items-start rounded-2xl border p-3 text-left transition-colors"
                 >
                   <span className="text-xl">{v.emoji}</span>
                   <span className="mt-1 text-sm font-semibold">{v.label}</span>
@@ -374,17 +544,23 @@ export default function CreateContent() {
             </div>
           )}
 
-          {step === 'genre' && (
-            <div className="flex flex-wrap gap-2">
-              {GENRE_OPTIONS.map((g) => (
-                <button
-                  key={g}
-                  onClick={() => handleGenreSelect(g)}
-                  className="border-border bg-surface hover:border-accent rounded-full border px-4 py-2 text-sm transition-colors"
-                >
-                  {g}
-                </button>
-              ))}
+          {step === 'music' && (
+            <div className="space-y-2">
+              <Input
+                autoFocus
+                value={musicInput}
+                onChange={(e) => setMusicInput(e.target.value)}
+                placeholder="e.g. Taylor Swift, Drake, Morgan Wallen"
+                className="rounded-2xl"
+              />
+              {qualityScore < 40 && (
+                <p className="text-muted text-center text-xs">
+                  One more detail above will make this feel unmistakably like them.
+                </p>
+              )}
+              <Button onClick={handleMusicSubmit} disabled={qualityScore < 40} className="w-full">
+                Continue →
+              </Button>
             </div>
           )}
 
@@ -396,20 +572,17 @@ export default function CreateContent() {
               }}
               className="flex gap-2"
             >
-              <input
+              <Input
                 autoFocus
                 type="email"
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 placeholder="your@email.com"
-                className="border-border bg-surface focus:border-accent flex-1 rounded-full border px-4 py-3 text-sm outline-none"
+                className="flex-1"
               />
-              <button
-                type="submit"
-                className="bg-accent rounded-full px-5 py-3 text-sm font-semibold whitespace-nowrap text-white"
-              >
+              <Button type="submit" className="whitespace-nowrap">
                 Generate for $9.99 →
-              </button>
+              </Button>
             </form>
           )}
 

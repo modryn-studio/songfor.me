@@ -13,10 +13,10 @@ export const site = {
   cta: 'Start their song for $9.99 →',
   founder: 'Luke Hanner',
   waitlist: {
-    headline: 'Songs are coming.',
+    headline: 'Get first access.',
     subheadline:
-      "We're still building. Drop your email — you'll be first when we launch, plus early-bird pricing.",
-    success: "You're on the list. We'll let you know the moment it's live.",
+      "songfor.me is in prelaunch. Join the list and you'll get first access the moment we open, plus early-bird pricing.",
+    success: "You're in. We'll email you as soon as first access opens.",
   },
   accent: '#FF6B6B',
   bg: '#FFFAF5',

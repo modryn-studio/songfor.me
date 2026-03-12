@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/cn';
 import { analytics } from '@/lib/analytics';
+import { Button } from '@/components/ui/button';
 
 export default function SongPlayer({
   audioUrl,
@@ -123,15 +124,16 @@ export default function SongPlayer({
 
       {/* Share */}
       <div className="mt-5 flex justify-end">
-        <button
+        <Button
           onClick={handleShare}
+          variant="secondary"
+          size="sm"
           className={cn(
-            'border-border rounded-full border px-4 py-2 text-sm font-medium transition-colors',
-            copied ? 'text-accent border-accent' : 'text-muted hover:border-accent'
+            copied ? 'border-accent bg-accent/10 text-accent' : 'text-muted hover:border-accent'
           )}
         >
           {copied ? '✓ Link copied!' : 'Share this song →'}
-        </button>
+        </Button>
       </div>
     </div>
   );

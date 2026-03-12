@@ -11,6 +11,7 @@ This prompt runs from **the tool repo** (not modryn-studio-v2).
 Read `next.config.ts`. Check that `basePath` is set and does NOT still contain `TODO_SLUG`.
 
 If it still says `TODO_SLUG`:
+
 > Stop. Run `/setup` first, or manually set `basePath` to `/tools/your-slug` in `next.config.ts`. The slug must match the URL field in `context.md`.
 
 If it's set correctly, extract the slug (the part after `/tools/`) and continue.
@@ -22,6 +23,7 @@ Run `npm run build`. Fix any errors before continuing. Do not proceed with a bro
 ## Step 3: Push to GitHub
 
 Run:
+
 ```
 git add -A
 git commit -m "chore: pre-deploy build verification"
@@ -35,6 +37,7 @@ If there are no uncommitted changes, skip the commit step and just confirm the b
 You cannot automate Vercel deployment. Tell Luke:
 
 > Push complete. Now:
+>
 > 1. Go to [vercel.com/new](https://vercel.com/new)
 > 2. Import this GitHub repo
 > 3. Leave all settings as default — do NOT set a custom domain

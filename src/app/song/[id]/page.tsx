@@ -71,9 +71,9 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
   const sections = parseLyrics(song.lyrics);
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
+    <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
       {/* Header */}
-      <div className="mb-10 text-center">
+      <div className="mb-8 text-center sm:mb-10">
         <p className="text-muted mb-2 text-sm font-medium tracking-widest uppercase">
           A birthday song for
         </p>
@@ -98,7 +98,7 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
       )}
 
       {/* Lyrics */}
-      <section className="mt-12 space-y-8" aria-label="Song lyrics">
+      <section className="mt-10 space-y-7 sm:mt-12 sm:space-y-8" aria-label="Song lyrics">
         {sections.map((s, i) => (
           <div key={i}>
             <p className="text-muted mb-2 text-xs font-semibold tracking-widest uppercase">
@@ -116,7 +116,7 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
       </section>
 
       {/* Attribution */}
-      <div className="border-border mt-14 border-t pt-8 text-center">
+      <div className="border-border mt-12 border-t pt-8 text-center sm:mt-14">
         <p className="text-muted text-sm">
           Made with{' '}
           <a href={site.url} className="text-accent hover:underline">

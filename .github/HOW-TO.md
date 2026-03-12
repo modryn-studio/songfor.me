@@ -80,6 +80,14 @@ At this point you have: a live site, tracking, SEO filed, a public tool listing,
 
 Now build the one killer feature. Wire the complete flow end-to-end — from user input to delivered output. Not ten features. One.
 
+### Minimum Money Loop
+
+Wire the complete loop end-to-end before polishing any single piece. One real order through the whole system beats a perfect intake with no delivery.
+
+Open `context.md` → find `## Minimum Money Loop` → keep it visible. Every build session, ask: _does this work advance the loop, or is it polish?_
+
+**Hard rule: do not touch the landing page until the loop has run once with a real order.**
+
 **The dev loop:**
 
 - `Ctrl+Shift+B` — starts the dev server, pipes output to `dev.log`. Tell Copilot **"check logs"** at any point.
@@ -88,7 +96,19 @@ Now build the one killer feature. Wire the complete flow end-to-end — from use
 
 **Before a major implementation:**
 
-Run `/validate` with a focus area: "validate my approach to the intake flow" or "validate the payment integration plan." You tell it what to focus on — it researches and challenges your assumptions before you build.
+Run `/validate` with a focus area. The mechanics matter — this only works correctly in **Agent mode**:
+
+1. Type `/validate` in the chat input — VS Code will show a dropdown suggesting the prompt. Select it so the prompt file actually loads.
+2. In the **same message**, after the slash command, add your focus question.
+3. Submit. The agent runs the full prompt file + your focus question with live web search.
+
+Example messages:
+
+- `/validate — validate my approach to the conversational intake before I build it. Is chat-style intake better than a progressive form for impulse buyers?`
+- `/validate — validate whether $9.99 is still the right price given BirthdaySongMaker's free tier`
+- `/validate — validate my plan to build the /song/[id] page next. What should I know about how competitors design song delivery pages?`
+
+**If the output looks entirely offline** (no fetched URLs, no live competitor data cited): you're in Ask or Plan mode, not Agent mode. Switch to Agent and run again.
 
 **When you're stuck:**
 
@@ -110,10 +130,11 @@ Run **`@check`** as a quality gate. Then push.
 You have a working core feature. Now loop: ship → validate → distribute → repeat.
 
 1. Run **`@check`** — quality gate after implementation.
-2. Run `/tool` — update the tool listing (flip status to `live` when ready). Merge the PR.
-3. Run `/log` — document what you shipped. Each log post is content and distribution. Merge the PR.
-4. Run `/social` (from modryn-studio-v2) if the milestone is worth announcing.
-5. **Repeat Phase 4–5** until your first paying user.
+2. Run `/polish` — UI consistency sweep. Ensures all interactive elements use shared primitives, brand tokens are applied consistently, responsive spacing is correct, mobile keyboard safety is wired, and touch targets meet minimums.
+3. Run `/tool` — update the tool listing (flip status to `live` when ready). Merge the PR.
+4. Run `/log` — document what you shipped. Each log post is content and distribution. Merge the PR.
+5. Run `/social` (from modryn-studio-v2) if the milestone is worth announcing.
+6. **Repeat Phase 4–5** until your first paying user.
 
 **Milestones that earn a `/log` post:**
 
@@ -137,19 +158,20 @@ You have a working core feature. Now loop: ship → validate → distribute → 
 
 ### Reusable vs. One-Time Commands
 
-| Command     | Frequency | What it does                                                                 |
-| ----------- | --------- | ---------------------------------------------------------------------------- |
-| `/setup`    | Once      | Fills `copilot-instructions.md` + `site.ts` from source docs                 |
-| `/update`   | Reusable  | Cascades source doc edits into derived files                                 |
-| `/validate` | Reusable  | Validates context + brand against live data. Use focused: "validate X"       |
-| `/assets`   | Reusable  | Generates favicons, icons, banner from logomark                              |
-| `/tool`     | Reusable  | Registers/updates tool on modrynstudio.com (`building` → `live`)             |
-| `/log`      | Reusable  | Drafts a build log post — run at every milestone                             |
-| `/deps`     | Reusable  | Validates dependencies against live docs                                     |
-| `/seo`      | Once      | SEO audit + Search Console + Bing setup                                      |
-| `/launch`   | Once      | Distribution checklist: sharing hooks, OG, social prep                       |
-| `@check`    | Reusable  | Quality gate: bugs, secrets, lint, build → auto-fixes, commits. Never pushes |
-| `@prebuilt` | Once      | Pre-build discovery: researches market, fills `context.md` + `brand.md`      |
+| Command     | Frequency | What it does                                                                                                                                                          |
+| ----------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@prebuilt` | Once      | Pre-build discovery: researches market, fills `context.md` + `brand.md`                                                                                               |
+| `/setup`    | Once      | Fills `copilot-instructions.md` + `site.ts` from source docs                                                                                                          |
+| `/deps`     | Reusable  | Validates dependencies against live docs                                                                                                                              |
+| `/assets`   | Reusable  | Generates favicons, icons, banner from logomark                                                                                                                       |
+| `/validate` | Reusable  | Reads `context.md`, `brand.md`, `strategy.md` + web-searches to validate. **Agent mode only.** Phase 1: run open-ended. Phase 4+: add focus question in same message. |
+| `/seo`      | Once      | SEO audit + Search Console + Bing setup                                                                                                                               |
+| `/launch`   | Once      | Distribution checklist: sharing hooks, OG, social prep                                                                                                                |
+| `/update`   | Reusable  | Cascades source doc edits into derived files                                                                                                                          |
+| `/tool`     | Reusable  | Registers/updates tool on modrynstudio.com (`building` → `live`)                                                                                                      |
+| `/log`      | Reusable  | Drafts a build log post — run at every milestone                                                                                                                      |
+| `/polish`   | Reusable  | UI consistency sweep: primitives, migrations, responsive, keyboard safety, touch targets                                                                              |
+| `@check`    | Reusable  | Quality gate: bugs, secrets, lint, build → auto-fixes, commits. Never pushes                                                                                          |
 
 > **modryn-studio-v2 only:** `/deploy` and `/social` exist only in that repo. Switch workspaces to run them.
 
@@ -223,23 +245,25 @@ Or run directly (requires [ImageMagick](https://imagemagick.org)):
 
 ```
 .github/
-├── copilot-instructions.md        ← Always-on context (derived — edit source docs, not this)
+├── copilot-instructions.md          ← Always-on context (derived — edit source docs, not this)
 ├── instructions/
-│   ├── nextjs.instructions.md     ← Auto-applied to .ts/.tsx files
-│   └── seo.instructions.md        ← Auto-applied to .ts/.tsx files
+│   ├── nextjs.instructions.md       ← Auto-applied to .ts/.tsx files
+│   ├── seo.instructions.md          ← Auto-applied to .ts/.tsx files
+│   └── design-system.instructions.md ← Auto-applied to .tsx files (primitives, brand tokens, responsive)
 ├── agents/
-│   ├── check.agent.md             ← @check agent (quality gate — reusable)
-│   └── prebuilt.agent.md          ← @prebuilt agent (pre-build discovery)
+│   ├── check.agent.md               ← @check agent (quality gate — reusable)
+│   └── prebuilt.agent.md            ← @prebuilt agent (pre-build discovery)
 ├── prompts/
-│   ├── setup.prompt.md            ← /setup (once)
-│   ├── update.prompt.md           ← /update (reusable)
-│   ├── validate.prompt.md         ← /validate (reusable)
-│   ├── assets.prompt.md           ← /assets (reusable)
-│   ├── tool.prompt.md             ← /tool (reusable)
-│   ├── deps.prompt.md             ← /deps (reusable)
-│   ├── log.prompt.md              ← /log (reusable)
-│   ├── seo.prompt.md              ← /seo (once)
-│   └── launch.prompt.md           ← /launch (once)
+│   ├── setup.prompt.md              ← /setup (once)
+│   ├── update.prompt.md             ← /update (reusable)
+│   ├── validate.prompt.md           ← /validate (reusable)
+│   ├── assets.prompt.md             ← /assets (reusable)
+│   ├── tool.prompt.md               ← /tool (reusable)
+│   ├── deps.prompt.md               ← /deps (reusable)
+│   ├── log.prompt.md                ← /log (reusable)
+│   ├── seo.prompt.md                ← /seo (once)
+│   ├── launch.prompt.md             ← /launch (once)
+│   └── polish.prompt.md             ← /polish (reusable)
 .vscode/
 ├── settings.json                  ← Agent mode, formatOnSave, Prettier default formatter
 ├── extensions.json                ← Recommends Prettier on first open

@@ -3,18 +3,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/cn';
 import type { Order, OrderStatus } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
-  pending_payment: 'bg-yellow-100 text-yellow-800',
-  paid: 'bg-blue-100 text-blue-800',
-  generating: 'bg-purple-100 text-purple-800',
-  done: 'bg-green-100 text-green-800',
-  delivered: 'bg-gray-100 text-gray-700',
+  pending_payment: 'bg-border text-muted border-border',
+  paid: 'bg-accent/10 text-accent border-accent/30',
+  generating: 'bg-secondary/20 text-text border-secondary/40',
+  done: 'bg-muted/15 text-text border-muted/30',
+  delivered: 'bg-surface text-muted border-border',
 };
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   return (
-    <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', STATUS_COLORS[status])}>
+    <span
+      className={cn('rounded-full border px-2 py-0.5 text-xs font-medium', STATUS_COLORS[status])}
+    >
       {status.replace('_', ' ')}
     </span>
   );
@@ -60,22 +64,18 @@ function LoginForm({ onAuth }: { onAuth: (pw: string) => void }) {
         className="border-border w-full max-w-sm rounded-xl border bg-white p-8"
       >
         <h1 className="font-heading mb-6 text-2xl font-semibold">Admin</h1>
-        <input
+        <Input
           type="password"
           value={pw}
           onChange={(e) => setPw(e.target.value)}
           placeholder="Password"
           autoFocus
-          className="border-border focus:border-accent w-full rounded-lg border px-4 py-3 text-sm outline-none"
+          className="rounded-xl"
         />
         {error && <p className="text-accent mt-2 text-sm">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-accent mt-4 w-full rounded-full py-3 text-sm font-semibold text-white disabled:opacity-60"
-        >
+        <Button type="submit" disabled={loading} className="mt-4 w-full">
           {loading ? 'Checking...' : 'Enter'}
-        </button>
+        </Button>
       </form>
     </div>
   );
@@ -93,18 +93,23 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
   async function handleDeliver() {
     if (!audioUrl.trim()) return;
     setDelivering(true);
-    const res = await fetch('/api/admin/deliver', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${pw}` },
-      body: JSON.stringify({ orderId: order.id, audioUrl: audioUrl.trim() }),
-    });
-    setDelivering(false);
-    if (res.ok) {
-      const data = (await res.json()) as { songId: string };
-      setSongId(data.songId);
-      setDelivered(true);
-    } else {
-      alert('Delivery failed — check console.');
+    try {
+      const res = await fetch('/api/admin/deliver', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${pw}` },
+        body: JSON.stringify({ orderId: order.id, audioUrl: audioUrl.trim() }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { songId: string };
+        setSongId(data.songId);
+        setDelivered(true);
+      } else {
+        alert('Delivery failed — check console.');
+      }
+    } catch {
+      alert('Network error — delivery may not have sent.');
+    } finally {
+      setDelivering(false);
     }
   }
 
@@ -112,14 +117,14 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
     <div className="border-border rounded-xl border bg-white">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-4 p-4 text-left"
+        className="flex w-full flex-col gap-3 p-4 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-4"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <StatusBadge status={delivered ? 'delivered' : order.status} />
-          <span className="font-medium">{order.recipient_name}</span>
-          <span className="text-muted text-sm">{order.buyer_email}</span>
+          <span className="shrink-0 font-medium">{order.recipient_name}</span>
+          <span className="text-muted truncate text-sm">{order.buyer_email}</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 self-end sm:self-auto">
           <span className="text-muted text-xs">{formatDate(order.created_at)}</span>
           <span className="text-muted text-sm">{open ? '▲' : '▼'}</span>
         </div>
@@ -128,31 +133,46 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
       {open && (
         <div className="border-border space-y-4 border-t p-4">
           {/* Intake */}
-          <div>
+          <div className="bg-border/30 rounded-xl p-3">
             <p className="text-muted mb-1 text-xs font-semibold tracking-wider uppercase">Intake</p>
             <div className="text-text space-y-0.5 text-sm">
+              {order.intake_data.nickname && (
+                <p>
+                  <strong>Nickname:</strong> {order.intake_data.nickname}
+                </p>
+              )}
               <p>
                 <strong>Age:</strong> {order.intake_data.age}
               </p>
-              <p>
-                <strong>Relationship:</strong> {order.intake_data.relationship}
-              </p>
-              <p>
-                <strong>Quirk 1:</strong> {order.intake_data.quirk1}
-              </p>
-              {order.intake_data.quirk2 && (
+              {order.intake_data.relationship && (
                 <p>
-                  <strong>Quirk 2:</strong> {order.intake_data.quirk2}
-                </p>
-              )}
-              {order.intake_data.quirk3 && (
-                <p>
-                  <strong>Quirk 3:</strong> {order.intake_data.quirk3}
+                  <strong>Relationship:</strong> {order.intake_data.relationship}
                 </p>
               )}
               <p>
-                <strong>Vibe:</strong> {order.intake_data.vibe} &middot; <strong>Genre:</strong>{' '}
-                {order.intake_data.genre}
+                <strong>Inner Circle:</strong> {order.intake_data.innerCircle}
+              </p>
+              <p>
+                <strong>Inside Joke:</strong> {order.intake_data.insideJoke}
+              </p>
+              {order.intake_data.recentContext && (
+                <p>
+                  <strong>Recent Context:</strong> {order.intake_data.recentContext}
+                </p>
+              )}
+              {order.intake_data.personalityTrait && (
+                <p>
+                  <strong>Personality:</strong> {order.intake_data.personalityTrait}
+                </p>
+              )}
+              <p>
+                <strong>Vibe:</strong> {order.intake_data.vibe}
+                {order.intake_data.musicReference && (
+                  <>
+                    {' '}
+                    &middot; <strong>Music:</strong> {order.intake_data.musicReference}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -193,25 +213,25 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
 
           {/* Deliver */}
           {!delivered && (
-            <div className="flex gap-2">
-              <input
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
                 value={audioUrl}
                 onChange={(e) => setAudioUrl(e.target.value)}
                 placeholder="Paste Suno audio URL..."
-                className="border-border focus:border-accent flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
+                className="flex-1 rounded-xl py-2"
               />
-              <button
+              <Button
                 onClick={handleDeliver}
                 disabled={delivering || !audioUrl.trim()}
-                className="bg-accent rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                className="rounded-xl px-4 py-2 sm:w-auto"
               >
                 {delivering ? 'Sending...' : 'Deliver ✉️'}
-              </button>
+              </Button>
             </div>
           )}
 
           {delivered && (
-            <p className="text-sm text-green-700">
+            <p className="text-muted bg-secondary/15 border-secondary/40 rounded-xl border px-3 py-2 text-sm">
               ✅ Delivered — email sent to {order.buyer_email}
             </p>
           )}
@@ -230,14 +250,19 @@ function Dashboard({ pw }: { pw: string }) {
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/orders', {
-      headers: { Authorization: `Bearer ${pw}` },
-    });
-    if (res.ok) {
-      const data = (await res.json()) as { orders: Order[] };
-      setOrders(data.orders);
+    try {
+      const res = await fetch('/api/admin/orders', {
+        headers: { Authorization: `Bearer ${pw}` },
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { orders: Order[] };
+        setOrders(data.orders);
+      }
+    } catch {
+      // Network failure — orders list stays empty
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [pw]);
 
   useEffect(() => {
@@ -258,28 +283,28 @@ function Dashboard({ pw }: { pw: string }) {
     <div className="mx-auto max-w-4xl px-4 py-10">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-heading text-2xl font-semibold">songfor.me admin</h1>
-        <button onClick={fetchOrders} className="text-muted text-sm underline">
+        <Button onClick={fetchOrders} variant="secondary" size="sm" className="rounded-xl">
           Refresh
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
         {(['all', 'pending_payment', 'paid', 'done', 'delivered'] as const).map((s) => (
-          <button
+          <Button
             key={s}
             onClick={() => setFilter(s)}
+            variant="secondary"
+            size="sm"
             className={cn(
-              'rounded-lg border px-3 py-2 text-xs font-medium transition-colors',
-              filter === s
-                ? 'border-accent text-accent bg-white'
-                : 'border-border text-muted bg-white'
+              'rounded-xl text-xs transition-colors',
+              filter === s ? 'border-accent bg-accent/10 text-accent' : 'text-muted'
             )}
           >
             {s === 'all'
               ? `All (${orders.length})`
               : `${s.replace('_', ' ')} (${statusCounts[s] ?? 0})`}
-          </button>
+          </Button>
         ))}
       </div>
 
