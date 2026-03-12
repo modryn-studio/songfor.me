@@ -13,12 +13,14 @@ import {
 interface SongDeliveryEmailProps {
   recipientName: string;
   songUrl: string;
+  downloadUrl: string;
   lyricsPreview: string;
 }
 
 export function SongDeliveryEmail({
   recipientName,
   songUrl,
+  downloadUrl,
   lyricsPreview,
 }: SongDeliveryEmailProps) {
   return (
@@ -60,6 +62,15 @@ export function SongDeliveryEmail({
           >
             Listen to {recipientName}&apos;s song →
           </Button>
+
+          <Text style={{ margin: '12px 0 0' }}>
+            <a
+              href={`${downloadUrl}?download=`}
+              style={{ color: '#9C8070', fontSize: '13px', textDecoration: 'underline' }}
+            >
+              ↓ Download MP3 — save it, text it, play it at the party
+            </a>
+          </Text>
 
           <Hr style={{ borderColor: '#E8DED6', margin: '36px 0' }} />
 

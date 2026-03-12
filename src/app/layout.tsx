@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { site } from '@/config/site';
-import { SiteSchema } from '@/components/site-schema';
-import { SiteFooter } from '@/components/site-footer';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -35,9 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
-        <SiteSchema />
         {children}
-        <SiteFooter />
         <Analytics />
       </body>
     </html>

@@ -7,10 +7,15 @@ import { SONG_GENERATION_SYSTEM_PROMPT } from '@/content/prompts/song-generation
 
 const log = createRouteLogger('intake');
 
-const VALID_VIBES: VibeType[] = ['heartfelt', 'hype', 'roast', 'kids'];
+const VALID_VIBES: VibeType[] = ['heartfelt', 'hype', 'roast', 'kids', 'surprise'];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_FREEFORM_WORDS = 15;
 
-interface IntakeBody extends IntakeData {
+interface IntakeBody {
+  freeformContext: string;
+  parsedName?: string;
+  vibe: VibeType;
+  musicReference: string;
   email: string;
 }
 
@@ -19,16 +24,17 @@ export async function POST(req: Request): Promise<Response> {
 
   try {
     const body = (await req.json()) as Partial<IntakeBody>;
-    log.info(ctx.reqId, 'Request received', { name: body.recipientName });
+    log.info(ctx.reqId, 'Request received', { name: body.parsedName });
 
     // ── Validate input ──────────────────────────────────────────────────────
-    if (!body.recipientName?.trim() || !body.age?.trim()) {
-      return log.end(ctx, Response.json({ error: 'Missing required fields' }, { status: 400 }));
-    }
-    if (!body.insideJoke?.trim()) {
+    const freeform = body.freeformContext?.trim() ?? '';
+    if (freeform.split(/\s+/).length < MIN_FREEFORM_WORDS) {
       return log.end(
         ctx,
-        Response.json({ error: 'At least one detail is required' }, { status: 400 })
+        Response.json(
+          { error: 'Tell us more — we need at least a few sentences to write a great song.' },
+          { status: 400 }
+        )
       );
     }
     if (!body.vibe || !VALID_VIBES.includes(body.vibe)) {
@@ -51,17 +57,12 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     // ── Sanitize intake (defend against oversized payloads) ────────────────
+    const recipientName = (body.parsedName ?? '').trim().slice(0, 100) || 'Birthday Person';
+
     const intake: IntakeData = {
-      recipientName: body.recipientName.trim().slice(0, 100),
-      nickname: (body.nickname ?? '').trim().slice(0, 100),
-      age: body.age.trim().slice(0, 10),
-      relationship: (body.relationship ?? '').trim().slice(0, 50),
-      innerCircle: (body.innerCircle ?? '').trim().slice(0, 500),
-      insideJoke: body.insideJoke.trim().slice(0, 300),
-      recentContext: (body.recentContext ?? '').trim().slice(0, 300),
-      personalityTrait: (body.personalityTrait ?? '').trim().slice(0, 300),
+      freeformContext: freeform.slice(0, 3000),
       vibe: body.vibe,
-      musicReference: (body.musicReference ?? '').trim().slice(0, 300),
+      musicReference: body.musicReference.trim().slice(0, 300),
     };
 
     // ── Generate lyrics + Suno style via Claude ────────────────────────────
@@ -71,7 +72,7 @@ export async function POST(req: Request): Promise<Response> {
 
     const claudeRes = await anthropic.messages.create({
       model: 'claude-opus-4-6',
-      max_tokens: 1500,
+      max_tokens: 2000,
       system: SONG_GENERATION_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userMessage }],
     });
@@ -98,7 +99,7 @@ export async function POST(req: Request): Promise<Response> {
       .from('orders')
       .insert({
         buyer_email: body.email.trim().toLowerCase(),
-        recipient_name: intake.recipientName,
+        recipient_name: recipientName,
         intake_data: intake,
         lyrics: generated.lyrics,
         suno_style: generated.suno_style,
@@ -115,12 +116,12 @@ export async function POST(req: Request): Promise<Response> {
 
     // ── Create Stripe Checkout Session ─────────────────────────────────────
     const stripe = new Stripe(stripeKey);
-    const origin = new URL(req.url).origin;
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/create/confirmed?order_id=${order.id}`,
+      success_url: `${origin}/create/confirmed?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/create`,
       metadata: { orderId: order.id },
       customer_email: body.email.trim().toLowerCase(),
@@ -129,7 +130,18 @@ export async function POST(req: Request): Promise<Response> {
     await db.from('orders').update({ stripe_session_id: session.id }).eq('id', order.id);
 
     log.info(ctx.reqId, 'Stripe session created', { sessionId: session.id });
-    return log.end(ctx, Response.json({ orderId: order.id, stripeUrl: session.url }));
+
+    // First 8 non-empty lines — teased in the preview step before Stripe redirect
+    const lyricsPreview = generated.lyrics
+      .split('\n')
+      .filter((l: string) => l.trim())
+      .slice(0, 8)
+      .join('\n');
+
+    return log.end(
+      ctx,
+      Response.json({ orderId: order.id, stripeUrl: session.url, lyricsPreview })
+    );
   } catch (error) {
     log.err(ctx, error);
     return Response.json({ error: 'Internal error' }, { status: 500 });
@@ -137,21 +149,12 @@ export async function POST(req: Request): Promise<Response> {
 }
 
 function buildUserMessage(intake: IntakeData): string {
-  const details = [intake.insideJoke, intake.recentContext, intake.personalityTrait]
-    .filter(Boolean)
-    .map((d, i) => `${i + 1}. ${d}`)
-    .join('\n');
-
-  const lines = [
-    `Recipient: ${intake.recipientName}, turning ${intake.age}`,
-    intake.nickname && `Nickname: ${intake.nickname}`,
-    intake.relationship && `Buyer's relationship: ${intake.relationship}`,
-    intake.innerCircle && `Inner circle (name-drop these people): ${intake.innerCircle}`,
-    `Details about them:`,
-    details,
+  return [
+    `About the birthday person (this is your raw material — the story, quirks, relationships, and details are all in here):`,
+    '',
+    intake.freeformContext,
+    '',
     `Vibe: ${intake.vibe}`,
-    intake.musicReference && `Music reference (artist, song, or genre): ${intake.musicReference}`,
-  ].filter(Boolean);
-
-  return lines.join('\n').trim();
+    `Sound/genre reference: ${intake.musicReference}`,
+  ].join('\n');
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabase';
 import { site } from '@/config/site';
 import type { Song } from '@/lib/types';
@@ -124,17 +125,17 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
         <div className="border-border mt-12 border-t pt-8 text-center sm:mt-14">
           <p className="text-muted text-sm">
             Made with{' '}
-            <a href={site.url} className="text-accent hover:underline">
+            <Link href="/" className="text-accent hover:underline">
               {site.name}
-            </a>{' '}
+            </Link>{' '}
             · Give someone a birthday song they&apos;ll never forget.
           </p>
-          <a
+          <Link
             href="/create"
             className="bg-accent mt-4 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white shadow transition-opacity hover:opacity-90"
           >
             Make one for someone →
-          </a>
+          </Link>
         </div>
       </main>
       <FeedbackWidget />

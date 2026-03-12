@@ -1,5 +1,18 @@
 -- Run this in the Supabase SQL Editor to initialize the database.
 -- Supabase project: songfor.me
+--
+-- ── Keys (Supabase new key system, 2025+) ─────────────────────────────────
+-- NEXT_PUBLIC_SUPABASE_URL     → Project URL (dashboard home page)
+-- NEXT_PUBLIC_SUPABASE_ANON_KEY → Publishable key (sb_publishable_...) on dashboard home page
+-- SUPABASE_SERVICE_ROLE_KEY    → Secret key (sb_secret_...) in Settings → API Keys → Secret keys tab
+-- Legacy anon/service_role JWT keys still work during transition.
+--
+-- ── Storage bucket (manual step — cannot be done via SQL) ─────────────────
+-- 1. Dashboard → Storage → New bucket
+-- 2. Name: songs
+-- 3. Set to PUBLIC (so audio files are directly streamable without auth)
+-- 4. Click Create Bucket
+-- The storage policy below grants public read access to all objects in the bucket.
 
 -- ─────────────────────────────────────────
 -- ORDERS
@@ -57,3 +70,18 @@ alter table emails enable row level security;
 
 create policy "Service role only" on emails
   using (false);
+
+-- ─────────────────────────────────────────
+-- STORAGE POLICIES
+-- (Run after creating the "songs" bucket in the Storage dashboard)
+-- ─────────────────────────────────────────
+
+-- Allow anyone to download/stream public song files
+create policy "Public songs are downloadable"
+  on storage.objects for select
+  using ( bucket_id = 'songs' );
+
+-- Only service role can upload (enforced at the API layer — admin route uses service key)
+create policy "Service role can upload songs"
+  on storage.objects for insert
+  with check ( bucket_id = 'songs' );

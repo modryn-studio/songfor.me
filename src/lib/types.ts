@@ -1,15 +1,8 @@
 export type OrderStatus = 'pending_payment' | 'paid' | 'generating' | 'done' | 'delivered';
-export type VibeType = 'heartfelt' | 'hype' | 'roast' | 'kids';
+export type VibeType = 'heartfelt' | 'hype' | 'roast' | 'kids' | 'surprise';
 
 export interface IntakeData {
-  recipientName: string;
-  nickname: string;
-  age: string;
-  relationship: string;
-  innerCircle: string;
-  insideJoke: string;
-  recentContext: string;
-  personalityTrait: string;
+  freeformContext: string;
   vibe: VibeType;
   musicReference: string;
 }

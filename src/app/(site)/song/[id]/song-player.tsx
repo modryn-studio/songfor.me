@@ -122,8 +122,16 @@ export default function SongPlayer({
         </div>
       </div>
 
-      {/* Share */}
-      <div className="mt-5 flex justify-end">
+      {/* Share + Download */}
+      <div className="mt-5 flex justify-end gap-2">
+        <a
+          href={`${audioUrl}?download=`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border-border text-muted hover:border-accent inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 text-sm font-medium transition-colors"
+        >
+          ↓ Download
+        </a>
         <Button
           onClick={handleShare}
           variant="secondary"

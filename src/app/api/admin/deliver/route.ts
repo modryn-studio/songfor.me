@@ -56,6 +56,13 @@ export async function POST(req: Request): Promise<Response> {
       return log.end(ctx, Response.json({ error: 'Order not found' }, { status: 404 }));
     }
 
+    if (order.status !== 'paid') {
+      return log.end(
+        ctx,
+        Response.json({ error: "Order must be in 'paid' status to deliver" }, { status: 409 })
+      );
+    }
+
     log.info(ctx.reqId, 'Order found', { orderId: order.id, recipient: order.recipient_name });
 
     // Create song record
@@ -98,6 +105,7 @@ export async function POST(req: Request): Promise<Response> {
         react: SongDeliveryEmail({
           recipientName: order.recipient_name,
           songUrl,
+          downloadUrl: body.audioUrl,
           lyricsPreview,
         }),
       });

@@ -86,9 +86,36 @@ function LoginForm({ onAuth }: { onAuth: (pw: string) => void }) {
 function OrderRow({ order, pw }: { order: Order; pw: string }) {
   const [open, setOpen] = useState(false);
   const [audioUrl, setAudioUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [delivering, setDelivering] = useState(false);
   const [delivered, setDelivered] = useState(order.status === 'delivered');
   const [songId, setSongId] = useState(order.song_id);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('orderId', order.id);
+      form.append('file', file);
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${pw}` },
+        body: form,
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { audioUrl: string };
+        setAudioUrl(data.audioUrl);
+      } else {
+        alert('Upload failed — check console.');
+      }
+    } catch {
+      alert('Network error during upload.');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleDeliver() {
     if (!audioUrl.trim()) return;
@@ -135,37 +162,9 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
           {/* Intake */}
           <div className="bg-border/30 rounded-xl p-3">
             <p className="text-muted mb-1 text-xs font-semibold tracking-wider uppercase">Intake</p>
-            <div className="text-text space-y-0.5 text-sm">
-              {order.intake_data.nickname && (
-                <p>
-                  <strong>Nickname:</strong> {order.intake_data.nickname}
-                </p>
-              )}
-              <p>
-                <strong>Age:</strong> {order.intake_data.age}
-              </p>
-              {order.intake_data.relationship && (
-                <p>
-                  <strong>Relationship:</strong> {order.intake_data.relationship}
-                </p>
-              )}
-              <p>
-                <strong>Inner Circle:</strong> {order.intake_data.innerCircle}
-              </p>
-              <p>
-                <strong>Inside Joke:</strong> {order.intake_data.insideJoke}
-              </p>
-              {order.intake_data.recentContext && (
-                <p>
-                  <strong>Recent Context:</strong> {order.intake_data.recentContext}
-                </p>
-              )}
-              {order.intake_data.personalityTrait && (
-                <p>
-                  <strong>Personality:</strong> {order.intake_data.personalityTrait}
-                </p>
-              )}
-              <p>
+            <div className="text-text space-y-1 text-sm">
+              <p className="whitespace-pre-wrap">{order.intake_data.freeformContext}</p>
+              <p className="text-muted pt-1 text-xs">
                 <strong>Vibe:</strong> {order.intake_data.vibe}
                 {order.intake_data.musicReference && (
                   <>
@@ -213,20 +212,39 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
 
           {/* Deliver */}
           {!delivered && (
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                value={audioUrl}
-                onChange={(e) => setAudioUrl(e.target.value)}
-                placeholder="Paste Suno audio URL..."
-                className="flex-1 rounded-xl py-2"
-              />
-              <Button
-                onClick={handleDeliver}
-                disabled={delivering || !audioUrl.trim()}
-                className="rounded-xl px-4 py-2 sm:w-auto"
-              >
-                {delivering ? 'Sending...' : 'Deliver ✉️'}
-              </Button>
+            <div className="space-y-2">
+              {!audioUrl ? (
+                <label
+                  className={cn(
+                    'flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed px-4 py-3 text-sm transition-colors',
+                    uploading
+                      ? 'border-border text-muted cursor-not-allowed'
+                      : 'border-accent/40 text-accent hover:border-accent hover:bg-accent/5'
+                  )}
+                >
+                  <input
+                    type="file"
+                    accept=".mp3,.wav,.m4a,.aac"
+                    disabled={uploading}
+                    onChange={handleFileChange}
+                    className="sr-only"
+                  />
+                  {uploading ? 'Uploading…' : '↑ Upload MP3 / WAV'}
+                </label>
+              ) : (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <p className="bg-border/40 text-muted flex-1 truncate rounded-xl px-3 py-2 text-xs">
+                    ✅ {audioUrl.split('/').pop()}
+                  </p>
+                  <Button
+                    onClick={handleDeliver}
+                    disabled={delivering}
+                    className="rounded-xl px-4 py-2 sm:w-auto"
+                  >
+                    {delivering ? 'Sending…' : 'Deliver ✉️'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
