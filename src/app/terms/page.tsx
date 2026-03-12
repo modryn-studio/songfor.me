@@ -71,8 +71,8 @@ export default function TermsPage() {
           <h2 className="font-heading mb-2 text-xl font-semibold">Contact</h2>
           <p>
             Questions?{' '}
-            <a href="mailto:hello@songfor.gift" className="text-accent hover:underline">
-              hello@songfor.gift
+            <a href={`mailto:${site.email}`} className="text-accent hover:underline">
+              {site.email}
             </a>
           </p>
         </section>
