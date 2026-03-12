@@ -10,15 +10,14 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Log to error tracking when available
     console.error(error);
   }, [error]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <h1 className="font-heading text-4xl font-semibold">Something went sideways.</h1>
+    <main className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
+      <h1 className="font-heading text-3xl font-semibold">Something went sideways.</h1>
       <p className="text-muted mt-4">{error.message || 'An unexpected error occurred.'}</p>
-      <Button onClick={reset} className="mt-8" size="lg">
+      <Button onClick={reset} className="mt-8">
         Try again
       </Button>
     </main>

@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send } from 'lucide-react';
 import { analytics } from '@/lib/analytics';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 type WidgetState = 'idle' | 'open' | 'submitting' | 'done';
 
@@ -23,12 +26,33 @@ export default function FeedbackWidget() {
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const collapseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (state === 'open') textareaRef.current?.focus();
   }, [state]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const viewport = window.visualViewport;
+
+    const updateKeyboardOffset = () => {
+      const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      setKeyboardOffset(offset > 120 ? offset : 0);
+    };
+
+    updateKeyboardOffset();
+    viewport.addEventListener('resize', updateKeyboardOffset);
+    viewport.addEventListener('scroll', updateKeyboardOffset);
+
+    return () => {
+      viewport.removeEventListener('resize', updateKeyboardOffset);
+      viewport.removeEventListener('scroll', updateKeyboardOffset);
+    };
+  }, []);
 
   // Open via custom event — used by the mobile footer trigger
   useEffect(() => {
@@ -90,10 +114,12 @@ export default function FeedbackWidget() {
   const formBody = (
     <div className="p-4">
       {state === 'done' ? (
-        <p className="font-mono text-sm">Thanks. Noted. 👊</p>
+        <p className="bg-secondary/15 border-secondary/50 rounded-2xl border px-3 py-2 text-sm">
+          Thanks. Noted.
+        </p>
       ) : (
         <>
-          <textarea
+          <Textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -101,27 +127,28 @@ export default function FeedbackWidget() {
             placeholder="What's broken? What's missing? What do you need?"
             disabled={state === 'submitting'}
             rows={4}
-            className="w-full resize-none border border-(--color-border) bg-transparent p-3 font-mono text-sm transition-colors outline-none placeholder:text-(--color-muted) focus:border-(--color-accent) disabled:opacity-50"
+            className="rounded-2xl"
           />
-          <input
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Email (optional — for a reply)"
             disabled={state === 'submitting'}
-            className="mt-2 w-full border border-(--color-border) bg-transparent p-3 font-mono text-xs transition-colors outline-none placeholder:text-(--color-muted) focus:border-(--color-accent) disabled:opacity-50"
+            className="mt-2 text-xs"
           />
-          {error && <p className="mt-2 font-mono text-xs text-red-500">{error}</p>}
+          {error && <p className="text-accent mt-2 text-xs">{error}</p>}
           <div className="mt-3 flex justify-end">
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={!message.trim() || state === 'submitting'}
-              className="flex items-center gap-2 bg-(--color-accent) px-4 py-2 font-mono text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              size="sm"
+              className="flex items-center gap-2"
             >
               <Send size={12} />
               {state === 'submitting' ? 'Sending...' : 'Send'}
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -129,11 +156,11 @@ export default function FeedbackWidget() {
   );
 
   const panelHeader = (
-    <div className="flex items-center justify-between border-b border-(--color-border) px-4 py-3">
-      <span className="font-mono text-xs font-bold tracking-widest uppercase">Feedback</span>
+    <div className="border-border flex items-center justify-between border-b px-4 py-3">
+      <span className="text-xs font-semibold tracking-widest uppercase">Feedback</span>
       <button
         onClick={close}
-        className="-mr-1 p-1 text-(--color-muted) transition-colors hover:text-(--color-text)"
+        className="text-muted hover:text-text -mr-1 p-1 transition-colors"
         aria-label="Close"
       >
         <X size={14} />
@@ -148,10 +175,11 @@ export default function FeedbackWidget() {
         className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out md:hidden ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
+        style={{ bottom: keyboardOffset }}
       >
         {/* Tap-outside backdrop */}
         {isOpen && <div className="fixed inset-0 -z-10 bg-black/20" onClick={close} />}
-        <div className="border-t-2 border-(--color-border) bg-(--color-surface) shadow-2xl">
+        <div className="border-border bg-surface max-h-[85vh] overflow-y-auto border-t-2 pb-[env(safe-area-inset-bottom)] shadow-2xl">
           {panelHeader}
           {formBody}
         </div>
@@ -168,13 +196,13 @@ export default function FeedbackWidget() {
         {/* Tab — leftmost, always the visible "handle" */}
         <button
           onClick={() => setState(isOpen ? 'idle' : 'open')}
-          className="flex shrink-0 items-center border-y-2 border-l-2 border-(--color-border) bg-(--color-surface) px-1.5 py-3 font-mono text-[0.6rem] font-bold tracking-widest uppercase text-(--color-accent) shadow-md transition-colors hover:bg-(--color-border)"
+          className="text-accent border-border bg-surface hover:bg-border/40 flex shrink-0 items-center rounded-l-2xl border border-r-0 px-3 py-2 text-xs font-semibold tracking-wide shadow-md transition-colors"
           aria-label={isOpen ? 'Close feedback' : 'Open feedback'}
         >
-          <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Feedback</span>
+          Feedback
         </button>
         {/* Panel — slides in with the tab */}
-        <div className="w-72 border-2 border-(--color-border) bg-(--color-surface) shadow-xl">
+        <div className="border-border bg-surface w-72 rounded-l-2xl border shadow-xl">
           {panelHeader}
           {formBody}
         </div>

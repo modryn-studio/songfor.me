@@ -18,6 +18,7 @@ How the product sounds in UI copy, headings, CTAs, and error messages.
 - Short sentences. Conversational. Reads like a text from someone who knows you.
 - Confident about what it does ("this will make them cry happy tears") without overselling the tech.
 - Never use: "AI-powered", "leverage", "revolutionary", "seamless", "unlock", "utilize", "cutting-edge", "game-changer"
+- **Never frame this as last-minute or forgetful.** The buyer is the thoughtful one. They didn't forget — they saw an opportunity no one else would take. Frame: "You thought of something no one else would." Same impulse moment, very different identity the buyer gets to wear.
 
 ---
 
@@ -104,3 +105,15 @@ Real copy to use as reference when writing UI text.
 - Song page: "This song was made for [Name], because [they deserve something that's actually personal]."
 - Footer: "Built by Luke. Because gift cards are boring."
 - Error: "Something went sideways. Try again — [Name] is worth it."
+
+---
+
+## Social Proof (Pre-Launch)
+
+No reviews yet. Use these real founder moments as landing page proof until they accumulate. They're in context.md (Origin Story) — pull from there. The short forms for copy:
+
+- "The first song I made — Monica turned 12. I played it at her party. Her mom started dancing when the hook hit. Monica laughed and went a little red. The room shifted."
+- "A 6-year-old named Lincoln still asks for his song on every car ride. Months later."
+- "She asked to hear it again before it was even over."
+
+Use one of these as a homepage testimonial block or pull quote until real buyer reviews replace them. Format: the moment, not a review star. First-person story beats a five-star rating at launch.

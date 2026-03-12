@@ -68,3 +68,4 @@ After cascading, report:
 - Anything in `context.md` or `brand.md` that is incomplete, contradictory, or missing that could cause issues later (flag but do not invent)
 
 Do not commit. Luke reviews the diff and commits manually.
+```

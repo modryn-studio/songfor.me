@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from 'react';
 import { analytics } from '@/lib/analytics';
 import { site } from '@/config/site';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function EmailSignup() {
   const [email, setEmail] = useState('');
@@ -45,16 +47,14 @@ export default function EmailSignup() {
           <h2 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
             {site.waitlist.headline}
           </h2>
-          <p className="text-muted mt-4 font-mono text-sm md:text-base">
-            {site.waitlist.subheadline}
-          </p>
+          <p className="text-muted mt-4 text-sm md:text-base">{site.waitlist.subheadline}</p>
 
           {!done ? (
             <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3 sm:flex-row">
               <label htmlFor="signup-email" className="sr-only">
                 Email address
               </label>
-              <input
+              <Input
                 id="signup-email"
                 type="email"
                 placeholder="your@email.com"
@@ -62,23 +62,19 @@ export default function EmailSignup() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={submitting}
-                className="border-border placeholder:text-muted focus-visible:ring-accent h-12 flex-1 rounded-none border-2 bg-transparent px-4 font-mono text-sm focus-visible:ring-1 focus-visible:outline-none"
+                className="h-12 flex-1"
               />
-              <button
-                type="submit"
-                disabled={submitting}
-                className="bg-accent h-12 rounded-none px-8 font-mono text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
-              >
-                {submitting ? 'Sending...' : 'Notify me'}
-              </button>
+              <Button type="submit" disabled={submitting} className="h-12 px-8">
+                {submitting ? 'Sending...' : 'Get first access'}
+              </Button>
             </form>
           ) : (
-            <div className="border-accent/30 bg-accent/5 text-accent mt-8 border p-4 font-mono text-sm">
+            <div className="border-secondary/50 bg-secondary/15 text-text mt-8 rounded-2xl border p-4 text-sm">
               {site.waitlist.success}
             </div>
           )}
 
-          {error && <p className="mt-4 font-mono text-sm text-red-500">{error}</p>}
+          {error && <p className="text-accent mt-4 text-sm">{error}</p>}
         </div>
       </div>
     </section>

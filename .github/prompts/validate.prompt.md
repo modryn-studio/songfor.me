@@ -1,10 +1,10 @@
 ---
 name: validate
-description: "Validates context.md and brand.md against live market data, competitor landscape, and SEO opportunity — produces validation reports with web search"
+description: 'Validates context.md and brand.md against live market data, competitor landscape, and SEO opportunity — produces validation reports with web search'
 agent: agent
 ---
 
-Read `context.md` and `brand.md` from the workspace root. Then run TWO validation passes using web search for every claim.
+Read `context.md`, `brand.md`, and `strategy.md` from the workspace root. Then run TWO validation passes using web search for every claim.
 
 ---
 
@@ -13,27 +13,32 @@ Read `context.md` and `brand.md` from the workspace root. Then run TWO validatio
 Web search to validate every major claim in context.md:
 
 ### Competitor Landscape
+
 - Search for existing tools solving the same problem
 - For each competitor found: name, URL, pricing, what they do well, what they miss
 - Rate the competition gap: GREEN (wide open), YELLOW (opportunity exists), RED (saturated)
 
 ### User Pain Validation
+
 - Search Reddit, forums, and social media for posts describing the exact pain this tool addresses
 - Quote 3–5 real posts (with links if possible)
 - Rate pain signal strength: STRONG (frequent, emotional posts), MODERATE (occasional mentions), WEAK (have to stretch to find it)
 
 ### SEO Opportunity
+
 - Search for the primary keywords the target user would type
 - Note what currently ranks — are results poor quality? Are there content gaps?
 - Check if pSEO is viable (head term + modifiers pattern)
 - Rate SEO opportunity: HIGH (poor existing content, clear keyword gap), MEDIUM (some competition but room), LOW (dominated by established players)
 
 ### Monetization Check
+
 - Based on competitor pricing and the value delivered, does the chosen monetization tier make sense?
 - If `one-time-payment`: is the $9 price point justified? Would users pay more? Less?
 - If `email-only`: is there a missed monetization opportunity?
 
 ### Route Map Sanity
+
 - Do the planned routes cover the core user flow?
 - Is anything missing (common patterns for this type of tool)?
 - Is anything unnecessary (scope creep for a 48-hour build)?
@@ -45,15 +50,18 @@ Web search to validate every major claim in context.md:
 Web search to validate brand positioning:
 
 ### Voice Check
+
 - Does the voice match the target user's expectations?
 - Search for how competitors communicate — is this differentiated enough?
 - Flag any voice rules that conflict with the target audience
 
 ### Visual Positioning
+
 - Search for competitor visual styles — does the chosen palette stand out?
 - Is the accent color already strongly associated with a competitor?
 
 ### Copy Effectiveness
+
 - Are the hero/CTA/footer examples compelling for the specific target user?
 - Do they pass the "so what?" test — would someone stop scrolling?
 - Compare to what's working in the space

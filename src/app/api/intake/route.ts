@@ -8,7 +8,6 @@ import { SONG_GENERATION_SYSTEM_PROMPT } from '@/content/prompts/song-generation
 const log = createRouteLogger('intake');
 
 const VALID_VIBES: VibeType[] = ['heartfelt', 'hype', 'roast', 'kids'];
-const VALID_GENRES = ['Pop', 'Country', 'Hip-Hop', 'Folk', 'R&B', 'Rock', 'Surprise me'];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface IntakeBody extends IntakeData {
@@ -23,20 +22,20 @@ export async function POST(req: Request): Promise<Response> {
     log.info(ctx.reqId, 'Request received', { name: body.recipientName });
 
     // ── Validate input ──────────────────────────────────────────────────────
-    if (!body.recipientName?.trim() || !body.age?.trim() || !body.relationship?.trim()) {
+    if (!body.recipientName?.trim() || !body.age?.trim()) {
       return log.end(ctx, Response.json({ error: 'Missing required fields' }, { status: 400 }));
     }
-    if (!body.quirk1?.trim()) {
+    if (!body.insideJoke?.trim()) {
       return log.end(
         ctx,
-        Response.json({ error: 'At least one quirk is required' }, { status: 400 })
+        Response.json({ error: 'At least one detail is required' }, { status: 400 })
       );
     }
     if (!body.vibe || !VALID_VIBES.includes(body.vibe)) {
       return log.end(ctx, Response.json({ error: 'Invalid vibe' }, { status: 400 }));
     }
-    if (!body.genre || !VALID_GENRES.includes(body.genre)) {
-      return log.end(ctx, Response.json({ error: 'Invalid genre' }, { status: 400 }));
+    if (!body.musicReference?.trim()) {
+      return log.end(ctx, Response.json({ error: 'Music reference is required' }, { status: 400 }));
     }
     if (!body.email || !EMAIL_REGEX.test(body.email)) {
       return log.end(ctx, Response.json({ error: 'Valid email required' }, { status: 400 }));
@@ -54,13 +53,15 @@ export async function POST(req: Request): Promise<Response> {
     // ── Sanitize intake (defend against oversized payloads) ────────────────
     const intake: IntakeData = {
       recipientName: body.recipientName.trim().slice(0, 100),
+      nickname: (body.nickname ?? '').trim().slice(0, 100),
       age: body.age.trim().slice(0, 10),
-      relationship: body.relationship.trim().slice(0, 50),
-      quirk1: body.quirk1.trim().slice(0, 300),
-      quirk2: (body.quirk2 ?? '').trim().slice(0, 300),
-      quirk3: (body.quirk3 ?? '').trim().slice(0, 300),
+      relationship: (body.relationship ?? '').trim().slice(0, 50),
+      innerCircle: (body.innerCircle ?? '').trim().slice(0, 500),
+      insideJoke: body.insideJoke.trim().slice(0, 300),
+      recentContext: (body.recentContext ?? '').trim().slice(0, 300),
+      personalityTrait: (body.personalityTrait ?? '').trim().slice(0, 300),
       vibe: body.vibe,
-      genre: body.genre.trim().slice(0, 50),
+      musicReference: (body.musicReference ?? '').trim().slice(0, 300),
     };
 
     // ── Generate lyrics + Suno style via Claude ────────────────────────────
@@ -69,7 +70,7 @@ export async function POST(req: Request): Promise<Response> {
     const userMessage = buildUserMessage(intake);
 
     const claudeRes = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
+      model: 'claude-opus-4-6',
       max_tokens: 1500,
       system: SONG_GENERATION_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userMessage }],
@@ -136,15 +137,21 @@ export async function POST(req: Request): Promise<Response> {
 }
 
 function buildUserMessage(intake: IntakeData): string {
-  const quirks = [intake.quirk1, intake.quirk2, intake.quirk3]
+  const details = [intake.insideJoke, intake.recentContext, intake.personalityTrait]
     .filter(Boolean)
-    .map((q, i) => `${i + 1}. ${q}`)
+    .map((d, i) => `${i + 1}. ${d}`)
     .join('\n');
 
-  return `Recipient: ${intake.recipientName}, turning ${intake.age}
-Relationship to buyer: ${intake.relationship}
-Things that are SO them:
-${quirks}
-Vibe: ${intake.vibe}
-Genre: ${intake.genre}`.trim();
+  const lines = [
+    `Recipient: ${intake.recipientName}, turning ${intake.age}`,
+    intake.nickname && `Nickname: ${intake.nickname}`,
+    intake.relationship && `Buyer's relationship: ${intake.relationship}`,
+    intake.innerCircle && `Inner circle (name-drop these people): ${intake.innerCircle}`,
+    `Details about them:`,
+    details,
+    `Vibe: ${intake.vibe}`,
+    intake.musicReference && `Music reference (artist, song, or genre): ${intake.musicReference}`,
+  ].filter(Boolean);
+
+  return lines.join('\n').trim();
 }

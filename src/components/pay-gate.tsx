@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore, useEffect, useState } from 'react';
 import { analytics } from '@/lib/analytics';
+import { Button } from '@/components/ui/button';
 
 const RECEIPT_KEY = 'payment_receipt';
 const RECEIPT_EVENT = 'receipt-stored';
@@ -105,18 +106,14 @@ export default function PayGate({ children, valueProposition, price, checkoutUrl
   if (hasPaid) return <>{children}</>;
 
   return (
-    <div className="border-border mx-auto max-w-md border-2 p-8 text-center">
+    <div className="border-border bg-surface mx-auto max-w-md rounded-2xl border p-8 text-center">
       <h3 className="font-heading text-xl font-semibold">{valueProposition}</h3>
-      <p className="text-muted mt-4 font-mono text-sm">
-        One-time payment. No account required. Works instantly.
+      <p className="text-muted mt-4 text-sm">
+        One-time payment. No account required. Quick checkout.
       </p>
-      <button
-        onClick={handleCheckout}
-        disabled={loading}
-        className="bg-accent mt-6 h-12 w-full rounded-none px-8 font-mono text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
-      >
+      <Button onClick={handleCheckout} disabled={loading} className="mt-6 h-12 w-full">
         {loading ? 'Redirecting...' : `Pay ${price}`}
-      </button>
+      </Button>
     </div>
   );
 }

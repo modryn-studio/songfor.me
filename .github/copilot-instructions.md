@@ -33,7 +33,8 @@ basePath:
 - clsx + tailwind-merge for class utilities
 - Vercel for deployment (Pro plan — commercial use)
 - Vercel Analytics `<Analytics />` component in `layout.tsx` for pageviews — do not use their `track()` API
-- **Planned (not yet installed):** Supabase (Postgres DB + Storage for orders, songs, MP3s), Claude API / Anthropic SDK (conversational intake + lyrics generation)
+- Supabase (free tier) — Postgres DB for orders/songs queue (`orders`, `songs`, `emails` tables) and Storage for MP3s
+- Claude API (Anthropic) — Model: `claude-opus-4-6` for conversational intake and lyrics/style string generation
 
 ## Project Structure
 
@@ -65,6 +66,7 @@ basePath:
 - Short sentences. Conversational. Reads like a text from someone who knows you.
 - Confident about what it does ("this will make them cry happy tears") without overselling the tech.
 - Never use: "AI-powered", "leverage", "revolutionary", "seamless", "unlock", "utilize", "cutting-edge", "game-changer"
+- Never frame as last-minute or forgetful. The buyer is the thoughtful one — they saw an opportunity no one else would take. Frame: "You thought of something no one else would."
 
 **Target User:** A mom scrolling her phone at 10pm realizing her kid's friend's birthday party is tomorrow and she forgot a gift. Or a 30-something who just saw their best friend's birthday post on Instagram and wants to do something that actually means something — not another gift card. Impulse gifters with good hearts and no time.
 

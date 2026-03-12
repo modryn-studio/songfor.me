@@ -4,6 +4,7 @@ import AdminContent from './page-content';
 
 export const metadata: Metadata = {
   title: `Admin — ${site.name}`,
+  description: 'Admin dashboard for managing songfor.me orders and song delivery.',
   robots: { index: false, follow: false },
 };
 

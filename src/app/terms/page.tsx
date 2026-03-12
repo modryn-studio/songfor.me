@@ -2,25 +2,25 @@ import type { Metadata } from 'next';
 import { site } from '@/config/site';
 
 export const metadata: Metadata = {
-  title: `Terms of Service — ${site.name}`,
-  description: `Terms of service for ${site.name}.`,
+  title: `Terms of Service — ${site.name} Birthday Song Generator`,
+  description:
+    'Terms for using songfor.me. $9.99 per song, delivered to your email in ~15 minutes. Read our usage rules, refund policy, and licensing terms.',
 };
 
 export default function TermsPage() {
   const effectiveDate = 'March 9, 2026';
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
-      <h1 className="font-heading mb-2 text-3xl font-semibold">Terms of Service</h1>
+    <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+      <h1 className="font-heading mb-2 text-3xl font-semibold sm:text-4xl">Terms of Service</h1>
       <p className="text-muted mb-10 text-sm">Effective {effectiveDate}</p>
 
-      <div className="text-text space-y-8 text-base leading-relaxed">
+      <div className="text-text space-y-8 text-[15px] leading-relaxed sm:text-base">
         <section>
           <h2 className="font-heading mb-2 text-xl font-semibold">The service</h2>
           <p>
             {site.name} generates personalized birthday songs based on details you provide. You pay
-            $9.99 per song. Songs are delivered to your email within approximately 15 minutes of
-            payment.
+            $9.99 per song. When ordering is open, songs are delivered to your email after payment.
           </p>
         </section>
 
@@ -54,9 +54,8 @@ export default function TermsPage() {
         <section>
           <h2 className="font-heading mb-2 text-xl font-semibold">Delivery</h2>
           <p>
-            We target delivery in ~15 minutes. During high demand or unexpected issues, delivery may
-            take longer. If your song is not delivered within 1 hour, contact us and we will make it
-            right.
+            Delivery timing can vary during high demand or unexpected issues. If your song is not
+            delivered within 1 hour of payment, contact us and we will make it right.
           </p>
         </section>
 

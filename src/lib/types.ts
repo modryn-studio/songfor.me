@@ -3,13 +3,15 @@ export type VibeType = 'heartfelt' | 'hype' | 'roast' | 'kids';
 
 export interface IntakeData {
   recipientName: string;
+  nickname: string;
   age: string;
   relationship: string;
-  quirk1: string;
-  quirk2: string;
-  quirk3: string;
+  innerCircle: string;
+  insideJoke: string;
+  recentContext: string;
+  personalityTrait: string;
   vibe: VibeType;
-  genre: string;
+  musicReference: string;
 }
 
 export interface Order {
