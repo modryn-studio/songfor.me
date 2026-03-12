@@ -100,8 +100,9 @@ export async function POST(req: Request): Promise<Response> {
             email: body.email!,
             unsubscribed: false,
             ...(segmentId && { segments: [{ id: segmentId }] }),
+            properties: { source: site.name },
           });
-          log.info(ctx.reqId, 'Resend contact created', { segmentId });
+          log.info(ctx.reqId, 'Resend contact created', { segmentId, source: site.name });
         } catch (resendError) {
           // Non-fatal — inbox notification already sent, list add failed silently
           log.warn(ctx.reqId, 'Resend contact creation failed', { error: resendError });
