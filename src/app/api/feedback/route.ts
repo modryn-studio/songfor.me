@@ -31,7 +31,7 @@ function buildHtml(body: FeedbackBody): string {
       ${body.message ? `<p><strong>Message:</strong><br/>${body.message}</p>` : ''}
       ${body.page ? `<p><strong>Page:</strong> ${body.page}</p>` : ''}
       <hr style="margin: 16px 0; border: 1px solid #333;" />
-      <p style="color: #666; font-size: 12px;">Sent from your site</p>
+      <p style="color: #666; font-size: 12px;">Sent from <strong>${site.name}</strong> — <a href="${site.url}">${site.url}</a></p>
     </div>
   `;
 }
@@ -75,9 +75,9 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const subjectMap: Record<FeedbackType, string> = {
-      newsletter: `📬 New signup: ${body.email}`,
-      feedback: `💬 Feedback${body.email ? ` from ${body.email}` : ''}`,
-      bug: `🐛 Bug report${body.email ? ` from ${body.email}` : ''}`,
+      newsletter: `📬 [${site.name}] New signup: ${body.email}`,
+      feedback: `💬 [${site.name}] Feedback${body.email ? ` from ${body.email}` : ''}`,
+      bug: `🐛 [${site.name}] Bug report${body.email ? ` from ${body.email}` : ''}`,
     };
 
     await transporter.sendMail({
