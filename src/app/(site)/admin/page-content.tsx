@@ -61,7 +61,7 @@ function LoginForm({ onAuth }: { onAuth: (pw: string) => void }) {
     <div className="flex min-h-screen items-center justify-center px-4">
       <form
         onSubmit={handleSubmit}
-        className="border-border w-full max-w-sm rounded-xl border bg-white p-8"
+        className="border-border bg-surface w-full max-w-sm rounded-xl border p-8"
       >
         <h1 className="font-heading mb-6 text-2xl font-semibold">Admin</h1>
         <Input
@@ -141,7 +141,7 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
   }
 
   return (
-    <div className="border-border rounded-xl border bg-white">
+    <div className="border-border bg-surface rounded-xl border">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full flex-col gap-3 p-4 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-4"

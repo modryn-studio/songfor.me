@@ -125,6 +125,8 @@ export async function POST(req: Request): Promise<Response> {
       cancel_url: `${origin}/create`,
       metadata: { orderId: order.id },
       customer_email: body.email.trim().toLowerCase(),
+      allow_promotion_codes: true,
+      payment_method_collection: 'if_required',
     });
 
     await db.from('orders').update({ stripe_session_id: session.id }).eq('id', order.id);

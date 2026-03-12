@@ -71,7 +71,7 @@ export default function SongPlayer({
   }, [recipientName]);
 
   return (
-    <div className="border-border rounded-2xl border bg-white p-6">
+    <div className="border-border bg-surface rounded-2xl border p-6">
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -128,7 +128,7 @@ export default function SongPlayer({
           href={`${audioUrl}?download=`}
           target="_blank"
           rel="noopener noreferrer"
-          className="border-border text-muted hover:border-accent inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 text-sm font-medium transition-colors"
+          className="border-border text-muted hover:border-accent bg-surface inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           ↓ Download
         </a>

@@ -85,12 +85,30 @@ basePath:
 - Delivery: "Oh my god. This is so them. I'm sending this right now."
 - Share: "Everyone needs to hear this. I'm posting this."
 
+**Positioning:**
+
+- What we are: The only birthday song generator that actually captures who someone is — their quirks, their jokes, their story.
+- What we're not: Another form where you type a name and pick "rock" or "pop."
+- One-liner: "Gift cards are forgettable. This isn't."
+
 **Copy Reference:**
 
 - Hero: "Make them a birthday song they'll never forget."
+- Subhead: "Tell us about them. We'll write the lyrics, compose the music, and deliver a one-of-a-kind song in minutes."
 - CTA: "Start their song →"
 - Waiting: "Your song is being crafted with love and a little bit of magic ✨"
+- Delivery email subject: "🎂 [Name]'s birthday song is ready!"
+- Song page: "This song was made for [Name], because [they deserve something that's actually personal]."
+- Footer: "Built by Luke. Because gift cards are boring."
 - Error: "Something went sideways. Try again — [Name] is worth it."
+
+**Social Proof (Pre-Launch):**
+
+Use these real founder moments as landing page proof until buyer reviews accumulate. Format: the moment, not a star rating.
+
+- "The first song I made — Monica turned 12. I played it at her party. Her mom started dancing when the hook hit. Monica laughed and went a little red. The room shifted."
+- "A 6-year-old named Lincoln still asks for his song on every car ride. Months later."
+- "She asked to hear it again before it was even over."
 
 ## README Standard
 

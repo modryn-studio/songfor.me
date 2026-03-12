@@ -515,13 +515,15 @@ export default function CreateContent() {
             <Image src="/brand/logomark.png" alt="songfor.me" width={24} height={24} />
           </Link>
           {showBack && (
-            <button
+            <Button
               onClick={handleBack}
-              className="text-muted hover:text-text shrink-0 text-sm transition-colors"
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
               aria-label="Go back one step"
             >
               ← Back
-            </button>
+            </Button>
           )}
           <div
             className="bg-border min-w-0 flex-1 overflow-hidden rounded-full"
