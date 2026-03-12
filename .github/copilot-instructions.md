@@ -202,7 +202,7 @@ export async function POST(req: Request): Promise<Response> {
 
 ## Analytics
 
-Vercel Analytics handles pageviews automatically via `<Analytics />` in `layout.tsx`.
+Vercel Analytics (`<Analytics />` in `layout.tsx`) handles pageviews automatically — no config needed.
 
 For custom events, use `analytics` from `@/lib/analytics.ts`:
 
@@ -212,6 +212,8 @@ analytics.track('event_name', { prop: value });
 ```
 
 Add a named method to `analytics.ts` for each distinct user action. Named methods are typed and discoverable — no magic strings scattered across files.
+
+**Vercel plan check required before adding custom events.** Custom events require Vercel Pro ($20/mo) — they do not appear in the Vercel Analytics dashboard on Hobby. Adding real event calls without an upgraded plan creates dead code that misleads future readers. Before instrumenting any new custom event: confirm the plan. If on Hobby, keep `analytics.ts` as a no-op stub until the plan is upgraded or a different provider is explicitly wired in. Do not add GA4 or PostHog without explicit instruction — keep it simple.
 
 ## Dev Server
 
