@@ -16,7 +16,7 @@ export const site = {
   waitlist: {
     headline: 'Get first access.',
     subheadline:
-      "songfor.me is in prelaunch. Join the list and you'll get first access the moment we open, plus early-bird pricing.",
+      "songfor.me is almost ready. Drop your email and you'll be first to know when we open.",
     success: "You're in. We'll email you as soon as first access opens.",
   },
   accent: '#FF6B6B',
