@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { site } from '@/config/site';
+import FeedbackWidget from '@/components/feedback-widget';
 import CreateContent from './page-content';
 
 export const metadata: Metadata = {
@@ -16,5 +17,10 @@ export const metadata: Metadata = {
 };
 
 export default function CreatePage() {
-  return <CreateContent />;
+  return (
+    <>
+      <CreateContent />
+      <FeedbackWidget />
+    </>
+  );
 }
