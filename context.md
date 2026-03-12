@@ -106,6 +106,8 @@ Resend email to buyer →
 /song/[id] shareable page
 ```
 
+**Infrastructure status (2026-03-12):** ✅ Supabase schema run · ✅ `songs` storage bucket created (public) · ✅ All env vars set in Vercel (all environments). Loop is fully wired and ready for end-to-end testing.
+
 **Rule:** Do not polish any one piece until this loop has run once with a real order.
 
 ## Product North Star

@@ -8,6 +8,7 @@
 -- Legacy anon/service_role JWT keys still work during transition.
 --
 -- ── Storage bucket (manual step — cannot be done via SQL) ─────────────────
+-- ✅ DONE (2026-03-12) — bucket created, public, policies applied
 -- 1. Dashboard → Storage → New bucket
 -- 2. Name: songs
 -- 3. Set to PUBLIC (so audio files are directly streamable without auth)
