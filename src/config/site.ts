@@ -12,6 +12,7 @@ export const site = {
     "Tell us about them — their name, their quirks, their inside jokes. We'll craft a personalized birthday song and deliver it in minutes. $9.99.",
   cta: 'Start their song for $9.99 →',
   founder: 'Luke Hanner',
+  email: 'hello@songfor.gift',
   waitlist: {
     headline: 'Get first access.',
     subheadline:
