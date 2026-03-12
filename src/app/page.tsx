@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import EmailSignup from '@/components/email-signup';
 import { site } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -26,16 +25,14 @@ export default function Home() {
         </p>
         <div className="mt-10">
           <Link
-            href="#signup"
+            href="/create"
             className="bg-accent inline-block rounded-full px-8 py-4 text-lg font-semibold text-white shadow-lg transition-opacity hover:opacity-90"
           >
-            Get first access &rarr;
+            Start their song &rarr;
           </Link>
         </div>
-        <p className="text-muted mt-4 text-sm">Prelaunch list open now &middot; first drops soon</p>
+        <p className="text-muted mt-4 text-sm">One-of-a-kind &middot; delivered in minutes &middot; $9.99</p>
       </section>
-
-      <EmailSignup />
     </main>
   );
 }
