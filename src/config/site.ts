@@ -14,10 +14,10 @@ export const site = {
   founder: 'Luke Hanner',
   email: 'hello@modrynstudio.com',
   waitlist: {
-    headline: 'Get first access.',
+    headline: 'Know someone with a birthday coming up?',
     subheadline:
-      "songfor.me is in prelaunch. Join the list and you'll get first access the moment we open, plus early-bird pricing.",
-    success: "You're in. We'll email you as soon as first access opens.",
+      'Give them the gift no one else will — a song made just for them, delivered in minutes.',
+    success: "We'll be in touch. In the meantime, start their song now.",
   },
   accent: '#FF6B6B',
   bg: '#FFFAF5',
