@@ -32,7 +32,7 @@ export default function Home() {
             Get first access &rarr;
           </Link>
         </div>
-        <p className="text-muted mt-4 text-sm">Prelaunch list open now &middot; first drops soon</p>
+        <p className="text-muted mt-4 text-sm">Prelaunch &middot; orders open soon</p>
       </section>
 
       <EmailSignup />
