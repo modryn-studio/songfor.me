@@ -74,67 +74,70 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
   return (
     <>
       <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
-      {/* Header */}
-      <div className="mb-8 text-center sm:mb-10">
-        <p className="text-muted mb-2 text-sm font-medium tracking-widest uppercase">
-          A birthday song for
-        </p>
-        <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-          {song.recipient_name}
-        </h1>
-      </div>
-
-      {/* Player */}
-      {song.audio_url ? (
-        <SongPlayer audioUrl={song.audio_url} recipientName={song.recipient_name} />
-      ) : (
-        <div className="border-border rounded-2xl border p-6 text-center">
-          <div className="flex items-center justify-center gap-3">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="bg-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-              <span className="bg-accent relative inline-flex h-2.5 w-2.5 rounded-full" />
-            </span>
-            <p className="text-muted text-sm">Song is being crafted — check back soon. ✨</p>
-          </div>
+        {/* Header */}
+        <div className="mb-8 text-center sm:mb-10">
+          <p className="text-muted mb-2 text-sm font-medium tracking-widest uppercase">
+            A birthday song for
+          </p>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+            {song.recipient_name}
+          </h1>
         </div>
-      )}
 
-      {/* Lyrics */}
-      <section className="mt-10 space-y-7 sm:mt-12 sm:space-y-8" aria-label="Song lyrics">
-        {sections.map((s, i) => (
-          <div key={i}>
-            <p className="text-muted mb-2 text-xs font-semibold tracking-widest uppercase">
-              {s.section}
-            </p>
-            <div className="space-y-1">
-              {s.lines.map((line, j) => (
-                <p key={j} className={line.trim() ? 'text-text text-base leading-relaxed' : 'h-2'}>
-                  {line}
-                </p>
-              ))}
+        {/* Player */}
+        {song.audio_url ? (
+          <SongPlayer audioUrl={song.audio_url} recipientName={song.recipient_name} />
+        ) : (
+          <div className="border-border rounded-2xl border p-6 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="bg-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                <span className="bg-accent relative inline-flex h-2.5 w-2.5 rounded-full" />
+              </span>
+              <p className="text-muted text-sm">Song is being crafted — check back soon. ✨</p>
             </div>
           </div>
-        ))}
-      </section>
+        )}
 
-      {/* Attribution */}
-      <div className="border-border mt-12 border-t pt-8 text-center sm:mt-14">
-        <p className="text-muted text-sm">
-          Made with{' '}
-          <a href={site.url} className="text-accent hover:underline">
-            {site.name}
-          </a>{' '}
-          · Give someone a birthday song they&apos;ll never forget.
-        </p>
-        <a
-          href="/create"
-          className="bg-accent mt-4 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white shadow transition-opacity hover:opacity-90"
-        >
-          Make one for someone →
-        </a>
-      </div>
-    </main>
-    <FeedbackWidget />
+        {/* Lyrics */}
+        <section className="mt-10 space-y-7 sm:mt-12 sm:space-y-8" aria-label="Song lyrics">
+          {sections.map((s, i) => (
+            <div key={i}>
+              <p className="text-muted mb-2 text-xs font-semibold tracking-widest uppercase">
+                {s.section}
+              </p>
+              <div className="space-y-1">
+                {s.lines.map((line, j) => (
+                  <p
+                    key={j}
+                    className={line.trim() ? 'text-text text-base leading-relaxed' : 'h-2'}
+                  >
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Attribution */}
+        <div className="border-border mt-12 border-t pt-8 text-center sm:mt-14">
+          <p className="text-muted text-sm">
+            Made with{' '}
+            <a href={site.url} className="text-accent hover:underline">
+              {site.name}
+            </a>{' '}
+            · Give someone a birthday song they&apos;ll never forget.
+          </p>
+          <a
+            href="/create"
+            className="bg-accent mt-4 inline-block rounded-full px-6 py-3 text-sm font-semibold text-white shadow transition-opacity hover:opacity-90"
+          >
+            Make one for someone →
+          </a>
+        </div>
+      </main>
+      <FeedbackWidget />
     </>
   );
 }
