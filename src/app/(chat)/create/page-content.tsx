@@ -629,6 +629,7 @@ export default function CreateContent() {
                     <button
                       key={chip.label}
                       type="button"
+                      onPointerDown={(e) => e.preventDefault()}
                       onClick={() => handleNudgeChip(chip.append)}
                       className="border-border text-muted hover:border-accent hover:text-text min-h-11 rounded-full border px-3 py-1 text-xs transition-colors"
                     >
