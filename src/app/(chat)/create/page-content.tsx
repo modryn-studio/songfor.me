@@ -215,7 +215,8 @@ const VIBE_OPTIONS: { value: VibeType; label: string; emoji: string; desc: strin
   { value: 'surprise', label: 'Surprise me', emoji: '✨', desc: "you pick, we'll nail it" },
 ];
 
-const GENRE_CHIPS = ['Pop', 'Hip-Hop', 'Country', 'R&B', 'Rock', 'Reggae', 'Surprise me'];
+const MUSIC_PRESET_OPTIONS = ['Pop', 'Hip-Hop', 'Country', 'R&B', 'Rock', 'Reggae', 'Surprise me'];
+const MUSIC_OPTIONS = [...MUSIC_PRESET_OPTIONS, 'Other'] as const;
 
 const STEP_ORDER: StepId[] = ['freeform', 'vibe', 'music', 'email'];
 
@@ -284,6 +285,7 @@ export default function CreateContent() {
   const [answers, setAnswers] = useState<Partial<IntakeAnswers>>({});
   const [freeformText, setFreeformText] = useState('');
   const [musicInput, setMusicInput] = useState('');
+  const [showMusicCustom, setShowMusicCustom] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [error, setError] = useState('');
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
@@ -356,7 +358,13 @@ export default function CreateContent() {
         });
         break;
       case 'music':
-        setMusicInput(answers.musicReference ?? '');
+        {
+          const existingMusic = answers.musicReference ?? '';
+          setMusicInput(existingMusic);
+          setShowMusicCustom(
+            existingMusic.length > 0 && !MUSIC_PRESET_OPTIONS.includes(existingMusic)
+          );
+        }
         setAnswers((p) => {
           const n = { ...p };
           delete n.musicReference;
@@ -399,9 +407,11 @@ export default function CreateContent() {
     analytics.intakeStep({ step: 'freeform' });
   }
 
-  function handleVibeSelect(vibe: VibeType) {
-    const label = VIBE_OPTIONS.find((v) => v.value === vibe)?.label ?? vibe;
+  function handleVibeSelect(vibe: VibeType, displayLabel?: string) {
+    const label = displayLabel ?? VIBE_OPTIONS.find((v) => v.value === vibe)?.label ?? vibe;
     setAnswers((p) => ({ ...p, vibe }));
+    setMusicInput('');
+    setShowMusicCustom(false);
     setMessages((prev) => [
       ...prev,
       { role: 'user', text: label },
@@ -497,6 +507,12 @@ export default function CreateContent() {
     step === 'generating' || step === 'preview' ? 100 : (stepIndex / STEP_ORDER.length) * 100;
   const showBack = stepIndex > 0 && step !== 'generating' && step !== 'preview';
   const showQuality = step === 'freeform' && freeformText.length > 0;
+  // Exclude freeform — that question is already the first chat bubble, which is always visible.
+  // For steps 2-4 the card anchors the active question above the input when messages scroll off-screen.
+  const activeQuestion =
+    step === 'generating' || step === 'preview' || step === 'freeform'
+      ? null
+      : getBotQuestion(step, name);
 
   const nudgeChips = step === 'freeform' && qualityScore < 70 ? getNudgeChips(freeformText) : [];
 
@@ -569,13 +585,18 @@ export default function CreateContent() {
       {/* ── Input panel ────────────────────────────────────────────────────── */}
       <div className="border-border bg-bg/95 shrink-0 border-t p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur-sm">
         <div className="mx-auto max-w-2xl">
+          {activeQuestion && (
+            <div className="border-border bg-surface mb-3 rounded-2xl border px-3 py-2.5">
+              <p className="text-text text-sm font-medium">{activeQuestion}</p>
+            </div>
+          )}
+
           {/* Step 1: Freeform dump */}
           {step === 'freeform' && (
             <div className="space-y-2">
               <div className="relative">
                 <Textarea
                   ref={textareaRef}
-                  autoFocus
                   value={freeformText}
                   onChange={(e) => setFreeformText(e.target.value)}
                   onFocus={() => setTextareaFocused(true)}
@@ -606,7 +627,7 @@ export default function CreateContent() {
                       key={chip.label}
                       type="button"
                       onClick={() => handleNudgeChip(chip.append)}
-                      className="border-border text-muted hover:border-accent hover:text-text rounded-full border px-3 py-1 text-xs transition-colors"
+                      className="border-border text-muted hover:border-accent hover:text-text min-h-11 rounded-full border px-3 py-1 text-xs transition-colors"
                     >
                       + {chip.label}
                     </button>
@@ -637,6 +658,16 @@ export default function CreateContent() {
                   <span className="text-muted text-xs">{v.desc}</span>
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => handleVibeSelect('surprise', 'Other (you choose)')}
+                className="border-border bg-surface text-text hover:border-accent col-span-2 rounded-2xl border p-3 text-left transition-colors"
+              >
+                <span className="text-sm font-semibold">Other (you choose)</span>
+                <span className="text-muted mt-1 block text-xs">
+                  You can guide the sound in the next step.
+                </span>
+              </button>
             </div>
           )}
 
@@ -644,23 +675,23 @@ export default function CreateContent() {
           {step === 'music' && (
             <div className="space-y-2">
               <div className="flex flex-wrap gap-1.5">
-                {GENRE_CHIPS.map((genre) => (
+                {MUSIC_OPTIONS.map((genre) => (
                   <button
                     key={genre}
                     type="button"
                     onClick={() => {
-                      if (genre === 'Surprise me') {
-                        setMusicInput(genre);
+                      if (genre === 'Other') {
+                        setShowMusicCustom(true);
+                        setMusicInput('');
                       } else {
-                        setMusicInput((prev) => {
-                          if (prev.includes(genre)) return prev;
-                          return prev ? `${prev}, ${genre}` : genre;
-                        });
+                        setShowMusicCustom(false);
+                        setMusicInput(genre);
                       }
                     }}
                     className={cn(
-                      'rounded-full border px-3 py-1.5 text-sm transition-colors',
-                      musicInput.includes(genre)
+                      'min-h-11 rounded-full border px-3 py-1.5 text-sm transition-colors',
+                      (genre === 'Other' && showMusicCustom) ||
+                        (!showMusicCustom && musicInput === genre)
                         ? 'border-accent bg-accent/10 text-accent'
                         : 'border-border text-muted hover:border-accent hover:text-text'
                     )}
@@ -669,16 +700,17 @@ export default function CreateContent() {
                   </button>
                 ))}
               </div>
-              <Input
-                autoFocus
-                value={musicInput}
-                onChange={(e) => setMusicInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleMusicSubmit();
-                }}
-                placeholder="or type an artist — Taylor Swift, Drake, Morgan Wallen..."
-                className="text-base"
-              />
+              {showMusicCustom && (
+                <Input
+                  value={musicInput}
+                  onChange={(e) => setMusicInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleMusicSubmit();
+                  }}
+                  placeholder="Type custom style or artist — e.g. Afrobeats with Burna Boy energy"
+                  className="text-base"
+                />
+              )}
               <Button onClick={handleMusicSubmit} className="w-full">
                 Continue →
               </Button>
@@ -695,7 +727,6 @@ export default function CreateContent() {
               className="flex gap-2"
             >
               <Input
-                autoFocus
                 type="email"
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
