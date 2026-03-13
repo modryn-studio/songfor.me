@@ -40,6 +40,26 @@ Note: songfor.me is a standalone domain — it earns this exception per the doma
 
 Google Search Console: Set up a new Domain property for songfor.me (separate from modrynstudio.com). Submit sitemap after initial deploy.
 
+## Minimum Money Loop
+
+The minimum sequence that results in money changing hands. Wire every step end-to-end before polishing any individual step. One real order through the whole system is the only milestone that matters.
+
+```
+Landing page →
+/create intake (Claude) →
+Stripe checkout ($9.99) →
+Admin sees new order →
+Admin uploads MP3 →
+Resend email to buyer →
+/song/[id] shareable page
+```
+
+**Infrastructure status (2026-03-12):** ✅ Supabase schema run · ✅ `songs` storage bucket created (public) · ✅ All env vars set in Vercel (all environments). Loop is fully wired and ready for end-to-end testing.
+
+**Rule:** Do not polish any one piece until this loop has run once with a real order.
+
+---
+
 ## Stack Additions
 
 - **Supabase** (free tier) — Postgres DB for song orders (queue), song metadata, email capture. Tables: `orders`, `songs`, `emails`. Free tier: 500 MB storage, 50K MAUs, 1 GB file storage (for MP3s). Note: free tier pauses after 7 days of inactivity — keep active with a cron ping or upgrade to Pro ($25/mo) once revenue justifies it.
@@ -91,24 +111,6 @@ Previous versions (for reference if encountering legacy content):
 - `/admin` → Password-protected admin dashboard (for founder only). View pending orders, upload MP3, paste lyrics, mark order as done (triggers Resend delivery email). Simple table UI. This is the manual fulfillment interface.
 - `/privacy` → Auto-generated.
 - `/terms` → Auto-generated.
-
-## Minimum Money Loop
-
-The minimum sequence that results in money changing hands. Wire every step end-to-end before polishing any individual step. One real order through the whole system is the only milestone that matters in Phase 4.
-
-```
-Landing page (leave it) →
-/create intake (Claude) →
-Stripe checkout ($9.99) →
-Admin sees new order →
-Admin uploads MP3 →
-Resend email to buyer →
-/song/[id] shareable page
-```
-
-**Infrastructure status (2026-03-12):** ✅ Supabase schema run · ✅ `songs` storage bucket created (public) · ✅ All env vars set in Vercel (all environments). Loop is fully wired and ready for end-to-end testing.
-
-**Rule:** Do not polish any one piece until this loop has run once with a real order.
 
 ## Product North Star
 
