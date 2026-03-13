@@ -21,19 +21,26 @@
 create table if not exists orders (
   id                uuid primary key default gen_random_uuid(),
   created_at        timestamptz not null default now(),
-  buyer_email       text not null,
+  buyer_email       text not null default '',
   recipient_name    text not null,
   intake_data       jsonb not null,
   lyrics            text,
   suno_style        text,
   status            text not null default 'pending_payment',
   stripe_session_id text,
-  song_id           uuid
+  song_id           uuid,
+  quality_rating    smallint check (quality_rating between 1 and 3)
+  -- 1 = missed, 2 = good, 3 = nailed it
 );
+
+-- Migrations for existing tables:
+-- alter table orders add column if not exists quality_rating smallint check (quality_rating between 1 and 3);
+-- alter table orders alter column buyer_email set default '';
 
 alter table orders enable row level security;
 
 -- No public access — all writes/reads go through the service role key
+drop policy if exists "Service role only" on orders;
 create policy "Service role only" on orders
   using (false);
 
@@ -54,6 +61,7 @@ create table if not exists songs (
 alter table songs enable row level security;
 
 -- Public songs are readable by anyone (for the shareable song page)
+drop policy if exists "Public songs are readable" on songs;
 create policy "Public songs are readable" on songs
   for select using (is_public = true);
 
@@ -69,6 +77,7 @@ create table if not exists emails (
 
 alter table emails enable row level security;
 
+drop policy if exists "Service role only" on emails;
 create policy "Service role only" on emails
   using (false);
 
@@ -78,11 +87,13 @@ create policy "Service role only" on emails
 -- ─────────────────────────────────────────
 
 -- Allow anyone to download/stream public song files
+drop policy if exists "Public songs are downloadable" on storage.objects;
 create policy "Public songs are downloadable"
   on storage.objects for select
   using ( bucket_id = 'songs' );
 
 -- Only service role can upload (enforced at the API layer — admin route uses service key)
+drop policy if exists "Service role can upload songs" on storage.objects;
 create policy "Service role can upload songs"
   on storage.objects for insert
   with check ( bucket_id = 'songs' );

@@ -10,6 +10,10 @@ I'm Luke Hanner — a solo founder building songfor.me, a personalized birthday 
 
 **The methodology is the IP:** The founder has been making personalized songs for years. People started asking him to make songs for their own people — that accumulated demand made this a product. The system for drawing out personal details (inside jokes, memories, quirks) and translating them into lyrics that actually land is encoded in Claude system prompts at `/content/prompts/`.
 
+## GitHub Repository
+
+https://github.com/modryn-studio/songfor.me
+
 ## Deployment
 
 <!-- Filled in by /setup from context.md.

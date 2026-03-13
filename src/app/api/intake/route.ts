@@ -8,7 +8,6 @@ import { SONG_GENERATION_SYSTEM_PROMPT } from '@/content/prompts/song-generation
 const log = createRouteLogger('intake');
 
 const VALID_VIBES: VibeType[] = ['heartfelt', 'hype', 'roast', 'kids', 'surprise'];
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_FREEFORM_WORDS = 15;
 
 interface IntakeBody {
@@ -16,7 +15,9 @@ interface IntakeBody {
   parsedName?: string;
   vibe: VibeType;
   musicReference: string;
-  email: string;
+  // Pre-generated lyrics/style from /api/generate-preview — skips Claude call
+  preGeneratedLyrics?: string;
+  preGeneratedStyle?: string;
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -43,9 +44,6 @@ export async function POST(req: Request): Promise<Response> {
     if (!body.musicReference?.trim()) {
       return log.end(ctx, Response.json({ error: 'Music reference is required' }, { status: 400 }));
     }
-    if (!body.email || !EMAIL_REGEX.test(body.email)) {
-      return log.end(ctx, Response.json({ error: 'Valid email required' }, { status: 400 }));
-    }
 
     // ── Validate env vars ───────────────────────────────────────────────────
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
@@ -65,40 +63,54 @@ export async function POST(req: Request): Promise<Response> {
       musicReference: body.musicReference.trim().slice(0, 300),
     };
 
-    // ── Generate lyrics + Suno style via Claude ────────────────────────────
-    log.info(ctx.reqId, 'Calling Claude');
-    const anthropic = new Anthropic({ apiKey: anthropicKey });
-    const userMessage = buildUserMessage(intake);
-
-    const claudeRes = await anthropic.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 2000,
-      system: SONG_GENERATION_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
-    });
-
-    const rawContent = claudeRes.content[0];
-    if (rawContent.type !== 'text') throw new Error('Unexpected Claude response type');
-
+    // ── Generate lyrics + Suno style via Claude (or use pre-generated) ────
     let generated: { lyrics: string; suno_style: string };
-    try {
-      const clean = rawContent.text
-        .replace(/^```json\s*/i, '')
-        .replace(/```\s*$/, '')
-        .trim();
-      generated = JSON.parse(clean);
-    } catch {
-      throw new Error('Failed to parse Claude response as JSON');
-    }
 
-    log.info(ctx.reqId, 'Lyrics generated', { chars: generated.lyrics.length });
+    if (body.preGeneratedLyrics && body.preGeneratedStyle) {
+      // Lyrics already generated at the preview step — skip Claude entirely
+      log.info(ctx.reqId, 'Using pre-generated lyrics');
+      generated = {
+        lyrics: body.preGeneratedLyrics.slice(0, 10000),
+        suno_style: body.preGeneratedStyle.slice(0, 1000),
+      };
+    } else {
+      log.info(ctx.reqId, 'Calling Claude');
+      const anthropic = new Anthropic({ apiKey: anthropicKey });
+      const userMessage = buildUserMessage(intake);
+
+      const claudeRes = await anthropic.messages.create({
+        model: 'claude-opus-4-6',
+        max_tokens: 4000,
+        system: SONG_GENERATION_SYSTEM_PROMPT,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 5 }] as any,
+        messages: [{ role: 'user', content: userMessage }],
+      });
+
+      // Web search inserts server_tool_use + result blocks before the final text — use findLast
+      const rawContent = claudeRes.content.findLast((b) => b.type === 'text');
+      if (!rawContent || rawContent.type !== 'text')
+        throw new Error('Unexpected Claude response type');
+
+      try {
+        const clean = rawContent.text
+          .replace(/^```json\s*/i, '')
+          .replace(/```\s*$/, '')
+          .trim();
+        generated = JSON.parse(clean);
+      } catch {
+        throw new Error('Failed to parse Claude response as JSON');
+      }
+
+      log.info(ctx.reqId, 'Lyrics generated', { chars: generated.lyrics.length });
+    }
 
     // ── Save order to Supabase ─────────────────────────────────────────────
     const db = supabaseAdmin();
     const { data: order, error: dbError } = await db
       .from('orders')
       .insert({
-        buyer_email: body.email.trim().toLowerCase(),
+        buyer_email: '',
         recipient_name: recipientName,
         intake_data: intake,
         lyrics: generated.lyrics,
@@ -124,7 +136,6 @@ export async function POST(req: Request): Promise<Response> {
       success_url: `${origin}/create/confirmed?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/create`,
       metadata: { orderId: order.id },
-      customer_email: body.email.trim().toLowerCase(),
       allow_promotion_codes: true,
       payment_method_collection: 'if_required',
     });
@@ -152,11 +163,13 @@ export async function POST(req: Request): Promise<Response> {
 
 function buildUserMessage(intake: IntakeData): string {
   return [
-    `About the birthday person (this is your raw material — the story, quirks, relationships, and details are all in here):`,
+    `About the birthday person (their story, quirks, relationships, and details are all in here):`,
     '',
     intake.freeformContext,
     '',
     `Vibe: ${intake.vibe}`,
     `Sound/genre reference: ${intake.musicReference}`,
+    '',
+    `Use web search to research the sound and style of any artists, genres, or cultural references mentioned above before writing. Search broadly — the more specific and current your knowledge, the better the song.`,
   ].join('\n');
 }

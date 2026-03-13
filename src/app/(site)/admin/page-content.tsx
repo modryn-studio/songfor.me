@@ -90,6 +90,16 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
   const [delivering, setDelivering] = useState(false);
   const [delivered, setDelivered] = useState(order.status === 'delivered');
   const [songId, setSongId] = useState(order.song_id);
+  const [rating, setRating] = useState<1 | 2 | 3 | null>(order.quality_rating);
+
+  async function handleRate(r: 1 | 2 | 3) {
+    const res = await fetch('/api/admin/rate', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${pw}` },
+      body: JSON.stringify({ orderId: order.id, rating: r }),
+    });
+    if (res.ok) setRating(r);
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -253,6 +263,35 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
               ✅ Delivered — email sent to {order.buyer_email}
             </p>
           )}
+
+          {/* Quality rating */}
+          <div className="space-y-1.5">
+            <p className="text-muted text-xs font-semibold tracking-wider uppercase">
+              Song quality
+            </p>
+            <div className="flex gap-2">
+              {(
+                [
+                  [1, '😬 Missed'],
+                  [2, '👍 Good'],
+                  [3, '🎯 Nailed it'],
+                ] as const
+              ).map(([r, label]) => (
+                <button
+                  key={r}
+                  onClick={() => handleRate(r)}
+                  className={cn(
+                    'rounded-full border px-3 py-1 text-xs transition-colors',
+                    rating === r
+                      ? 'border-accent bg-accent/10 text-accent font-semibold'
+                      : 'border-border text-muted hover:border-accent hover:text-text'
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

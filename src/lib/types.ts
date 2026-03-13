@@ -18,6 +18,7 @@ export interface Order {
   status: OrderStatus;
   stripe_session_id: string | null;
   song_id: string | null;
+  quality_rating: 1 | 2 | 3 | null;
 }
 
 export interface Song {
