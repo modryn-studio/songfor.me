@@ -750,7 +750,7 @@ export default function CreateContent() {
               <div className="bg-accent h-2.5 w-2.5 animate-bounce rounded-full [animation-delay:-0.15s]" />
               <div className="bg-accent h-2.5 w-2.5 animate-bounce rounded-full" />
               <span className="text-muted ml-2 text-sm">
-                Writing {name || 'their'}&apos;s song...
+                Writing {name ? `${name}'s` : 'their'} song...
               </span>
             </div>
           )}

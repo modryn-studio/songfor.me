@@ -33,7 +33,9 @@ export default async function ConfirmedPage({
     notFound();
   }
 
-  if (session.payment_status !== 'paid') notFound();
+  // Accept 'paid' (card payment) and 'no_payment_required' (100% off promo code)
+  if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required')
+    notFound();
 
   const orderId = session.metadata?.orderId;
   if (!orderId) notFound();
