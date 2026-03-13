@@ -514,7 +514,10 @@ export default function CreateContent() {
       ? null
       : getBotQuestion(step, name);
 
-  const nudgeChips = step === 'freeform' && qualityScore < 70 ? getNudgeChips(freeformText) : [];
+  const nudgeChips =
+    step === 'freeform' && (textareaFocused || freeformText.length > 0) && qualityScore < 70
+      ? getNudgeChips(freeformText)
+      : [];
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -620,7 +623,7 @@ export default function CreateContent() {
               </div>
 
               {/* Nudge chips */}
-              {nudgeChips.length > 0 && freeformText.length > 0 && (
+              {nudgeChips.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {nudgeChips.map((chip) => (
                     <button
