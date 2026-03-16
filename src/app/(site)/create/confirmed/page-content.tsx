@@ -76,6 +76,11 @@ function Confetti() {
 }
 
 export default function ConfirmedContent({ email, name }: { email: string; name: string }) {
+  useEffect(() => {
+    // Payment confirmed — clear the intake draft so the next song starts fresh
+    localStorage.removeItem('songforme_draft');
+  }, []);
+
   return (
     <>
       <Confetti />
@@ -86,8 +91,8 @@ export default function ConfirmedContent({ email, name }: { email: string; name:
             {name}&apos;s song is being crafted.
           </h1>
           <p className="text-muted mx-auto mt-4 max-w-sm text-base">
-            We&apos;ll send it to <span className="text-text font-medium">{email}</span> in about 15
-            minutes.
+            We&apos;ll send it to <span className="text-text font-medium">{email}</span> as soon as
+            it&apos;s ready — usually within a few hours.
           </p>
 
           {/* Pulse indicator */}
@@ -96,14 +101,12 @@ export default function ConfirmedContent({ email, name }: { email: string; name:
               <span className="bg-accent absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
               <span className="bg-accent relative inline-flex h-3 w-3 rounded-full" />
             </span>
-            <span className="text-muted text-sm">
-              Lyrics generating · Song composing · Almost there
-            </span>
+            <span className="text-muted text-sm">Song composing · Almost there</span>
           </div>
 
           <p className="text-muted mt-16 text-xs">
-            Check your spam folder if it doesn&apos;t arrive within 20 minutes — then reply to this
-            page and we&apos;ll sort it.
+            Check your spam folder if it doesn&apos;t arrive. Still nothing? Hit the feedback button
+            and we&apos;ll sort it.
           </p>
         </div>
       </main>

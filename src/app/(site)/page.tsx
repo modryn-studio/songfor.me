@@ -35,7 +35,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="text-muted mt-4 text-sm">
-            One-of-a-kind &middot; delivered in minutes &middot; $9.99
+            One-of-a-kind &middot; made just for them &middot; $9.99
           </p>
         </section>
       </main>

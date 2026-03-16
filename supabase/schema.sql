@@ -82,6 +82,25 @@ create policy "Service role only" on emails
   using (false);
 
 -- ─────────────────────────────────────────
+-- PREVIEWS
+-- Logged whenever generate-preview succeeds — tracks users who saw lyrics but didn't pay.
+-- ─────────────────────────────────────────
+create table if not exists previews (
+  id               uuid primary key default gen_random_uuid(),
+  created_at       timestamptz not null default now(),
+  recipient_name   text not null default '',
+  freeform_context text not null,
+  lyrics           text,
+  suno_style       text
+);
+
+alter table previews enable row level security;
+
+drop policy if exists "Service role only" on previews;
+create policy "Service role only" on previews
+  using (false);
+
+-- ─────────────────────────────────────────
 -- STORAGE POLICIES
 -- (Run after creating the "songs" bucket in the Storage dashboard)
 -- ─────────────────────────────────────────

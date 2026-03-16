@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/cn';
-import type { Order, OrderStatus } from '@/lib/types';
+import type { Order, OrderStatus, Preview } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -302,21 +302,28 @@ function OrderRow({ order, pw }: { order: Order; pw: string }) {
 
 function Dashboard({ pw }: { pw: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [previews, setPreviews] = useState<Preview[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all');
+  const [view, setView] = useState<'orders' | 'previews'>('orders');
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/orders', {
-        headers: { Authorization: `Bearer ${pw}` },
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { orders: Order[] };
+      const [ordersRes, previewsRes] = await Promise.all([
+        fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${pw}` } }),
+        fetch('/api/admin/previews', { headers: { Authorization: `Bearer ${pw}` } }),
+      ]);
+      if (ordersRes.ok) {
+        const data = (await ordersRes.json()) as { orders: Order[] };
         setOrders(data.orders);
       }
+      if (previewsRes.ok) {
+        const data = (await previewsRes.json()) as { previews: Preview[] };
+        setPreviews(data.previews);
+      }
     } catch {
-      // Network failure — orders list stays empty
+      // Network failure — lists stay empty
     } finally {
       setLoading(false);
     }
@@ -327,6 +334,10 @@ function Dashboard({ pw }: { pw: string }) {
   }, [fetchOrders]);
 
   const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
+
+  const paidCount = orders.filter((o) => o.status !== 'pending_payment').length;
+  const conversionPct =
+    previews.length > 0 ? Math.round((paidCount / previews.length) * 100) : null;
 
   const statusCounts = orders.reduce(
     (acc, o) => {
@@ -345,34 +356,124 @@ function Dashboard({ pw }: { pw: string }) {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-        {(['all', 'pending_payment', 'paid', 'done', 'delivered'] as const).map((s) => (
-          <Button
-            key={s}
-            onClick={() => setFilter(s)}
-            variant="secondary"
-            size="sm"
-            className={cn(
-              'rounded-xl text-xs transition-colors',
-              filter === s ? 'border-accent bg-accent/10 text-accent' : 'text-muted'
-            )}
-          >
-            {s === 'all'
-              ? `All (${orders.length})`
-              : `${s.replace('_', ' ')} (${statusCounts[s] ?? 0})`}
-          </Button>
-        ))}
+      {/* Conversion stat */}
+      <div className="border-border mb-6 flex gap-4 rounded-xl border p-4">
+        <div>
+          <p className="text-muted text-xs font-semibold tracking-wider uppercase">Previews</p>
+          <p className="text-text text-2xl font-semibold">{previews.length}</p>
+        </div>
+        <div className="bg-border w-px" />
+        <div>
+          <p className="text-muted text-xs font-semibold tracking-wider uppercase">Paid</p>
+          <p className="text-text text-2xl font-semibold">{paidCount}</p>
+        </div>
+        {conversionPct !== null && (
+          <>
+            <div className="bg-border w-px" />
+            <div>
+              <p className="text-muted text-xs font-semibold tracking-wider uppercase">
+                Conversion
+              </p>
+              <p className="text-text text-2xl font-semibold">{conversionPct}%</p>
+            </div>
+          </>
+        )}
       </div>
 
+      {/* View toggle */}
+      <div className="mb-4 flex gap-2">
+        <Button
+          onClick={() => setView('orders')}
+          variant="secondary"
+          size="sm"
+          className={cn(
+            'rounded-xl',
+            view === 'orders' ? 'border-accent bg-accent/10 text-accent' : 'text-muted'
+          )}
+        >
+          Orders ({orders.length})
+        </Button>
+        <Button
+          onClick={() => setView('previews')}
+          variant="secondary"
+          size="sm"
+          className={cn(
+            'rounded-xl',
+            view === 'previews' ? 'border-accent bg-accent/10 text-accent' : 'text-muted'
+          )}
+        >
+          Previews ({previews.length})
+        </Button>
+      </div>
+
+      {/* Stats */}
+      {view === 'orders' && (
+        <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+          {(['all', 'pending_payment', 'paid', 'done', 'delivered'] as const).map((s) => (
+            <Button
+              key={s}
+              onClick={() => setFilter(s)}
+              variant="secondary"
+              size="sm"
+              className={cn(
+                'rounded-xl text-xs transition-colors',
+                filter === s ? 'border-accent bg-accent/10 text-accent' : 'text-muted'
+              )}
+            >
+              {s === 'all'
+                ? `All (${orders.length})`
+                : `${s.replace('_', ' ')} (${statusCounts[s] ?? 0})`}
+            </Button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
-        <p className="text-muted text-center text-sm">Loading orders...</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-muted text-center text-sm">No orders yet.</p>
+        <p className="text-muted text-center text-sm">Loading...</p>
+      ) : view === 'orders' ? (
+        filtered.length === 0 ? (
+          <p className="text-muted text-center text-sm">No orders yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((order) => (
+              <OrderRow key={order.id} order={order} pw={pw} />
+            ))}
+          </div>
+        )
+      ) : previews.length === 0 ? (
+        <p className="text-muted text-center text-sm">No previews yet.</p>
       ) : (
         <div className="space-y-3">
-          {filtered.map((order) => (
-            <OrderRow key={order.id} order={order} pw={pw} />
+          {previews.map((preview) => (
+            <div key={preview.id} className="border-border bg-surface rounded-xl border p-4">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="font-medium">{preview.recipient_name || '—'}</span>
+                <span className="text-muted text-xs">{formatDate(preview.created_at)}</span>
+              </div>
+              <p className="text-text mb-3 text-sm whitespace-pre-wrap">
+                {preview.freeform_context}
+              </p>
+              {preview.suno_style && (
+                <div className="mb-2">
+                  <p className="text-muted mb-1 text-xs font-semibold tracking-wider uppercase">
+                    Style
+                  </p>
+                  <p className="bg-border/40 rounded-lg p-2 font-mono text-xs">
+                    {preview.suno_style}
+                  </p>
+                </div>
+              )}
+              {preview.lyrics && (
+                <div>
+                  <p className="text-muted mb-1 text-xs font-semibold tracking-wider uppercase">
+                    Lyrics
+                  </p>
+                  <pre className="bg-border/40 max-h-48 overflow-y-auto rounded-lg p-2 text-xs whitespace-pre-wrap">
+                    {preview.lyrics}
+                  </pre>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

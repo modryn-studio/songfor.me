@@ -5,12 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/cn';
 import { analytics } from '@/lib/analytics';
-import type { VibeType } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-type StepId = 'freeform' | 'vibe' | 'music' | 'generating' | 'preview';
+type StepId = 'freeform' | 'clarify' | 'generating' | 'preview';
 
 interface Message {
   role: 'bot' | 'user';
@@ -19,8 +18,6 @@ interface Message {
 
 interface IntakeAnswers {
   freeform: string;
-  vibe: VibeType;
-  musicReference: string;
 }
 
 interface PreviewData {
@@ -165,7 +162,13 @@ const NUDGE_CHIPS: { label: string; append: string }[] = [
 const CRAFTING_MESSAGES: Array<(name: string) => string> = [
   (name) => `Getting to know ${name || 'them'} through every detail you shared...`,
   () => 'Crafting the opening hook...',
+  () => 'Searching for the right words...',
+  () => 'This may take a minute — writing something worth waiting for.',
+  (name) => `Building the chorus around ${name || 'them'}...`,
   () => "Finding the rhyme that'll stop the room...",
+  () => 'Layering in the details that make it personal...',
+  () => 'Shaping the bridge...',
+  () => 'Making every line earn its place...',
   () => 'Almost there — finishing the final verse...',
 ];
 
@@ -251,57 +254,14 @@ function QualityRing({ score }: { score: number }) {
   );
 }
 
-// Typewriter overlay for the music input — short artist names read fast, so hold is shorter
-function MusicTypewriter() {
-  const text = useTypewriter(MUSIC_TYPEWRITER_EXAMPLES, true, 1200);
-  if (!text) return null;
-  return (
-    <div
-      className="text-muted/50 pointer-events-none absolute inset-0 flex items-center overflow-hidden px-3 text-base"
-      aria-hidden="true"
-    >
-      {text}
-      <span
-        className="ml-0.5 inline-block w-0.5 animate-pulse bg-current"
-        style={{ height: '1em', verticalAlign: 'text-bottom' }}
-      />
-    </div>
-  );
-}
-
-const VIBE_OPTIONS: { value: VibeType; label: string; emoji: string; desc: string }[] = [
-  { value: 'heartfelt', label: 'Heartfelt', emoji: '🥺', desc: 'touching, genuine' },
-  { value: 'hype', label: 'Hype', emoji: '🎉', desc: "party energy, let's go" },
-  { value: 'roast', label: 'Roast', emoji: '🔥', desc: 'lovingly, of course' },
-  { value: 'kids', label: 'Kids Bop', emoji: '🎈', desc: 'for little ones' },
-  { value: 'surprise', label: 'Surprise me', emoji: '✨', desc: "we'll pick what fits them best" },
-];
-
-const MUSIC_PRESET_OPTIONS = ['Pop', 'Hip-Hop', 'Country', 'R&B', 'Rock', 'Reggae'];
-
-const MUSIC_TYPEWRITER_EXAMPLES = [
-  'Taylor Swift',
-  'Drake',
-  'Morgan Wallen',
-  'Beyoncé',
-  'Kendrick Lamar',
-  'Olivia Rodrigo',
-  'Bad Bunny',
-  'Post Malone',
-  'Country',
-  'Hip-Hop',
-];
-
-const STEP_ORDER: StepId[] = ['freeform', 'vibe', 'music'];
+const STEP_ORDER: StepId[] = ['freeform', 'clarify'];
 
 function getBotQuestion(step: StepId, _name: string): string {
   switch (step) {
     case 'freeform':
       return "Tell us about them — their name, age, any nicknames, hobbies, inside jokes, and who'll be celebrating with them.";
-    case 'vibe':
-      return 'What vibe should the song have?';
-    case 'music':
-      return "Who do they love listening to? Even a genre works if you're not sure.";
+    case 'clarify':
+      return '';
     default:
       return '';
   }
@@ -309,7 +269,15 @@ function getBotQuestion(step: StepId, _name: string): string {
 
 // ── Lyrics preview card ──────────────────────────────────────────────────────
 
-function LyricsPreviewCard({ lyricsPreview, name }: { lyricsPreview: string; name: string }) {
+function LyricsPreviewCard({
+  lyricsPreview,
+  name,
+  sunoStyle,
+}: {
+  lyricsPreview: string;
+  name: string;
+  sunoStyle?: string;
+}) {
   const lines = lyricsPreview
     .split('\n')
     .map((l) => l.trim())
@@ -341,6 +309,7 @@ function LyricsPreviewCard({ lyricsPreview, name }: { lyricsPreview: string; nam
           <div className="to-surface pointer-events-none absolute inset-0 bg-linear-to-b from-transparent" />
         </div>
       )}
+      {sunoStyle && <p className="text-muted mt-3 text-xs italic">♪ {sunoStyle}</p>}
       <p className="text-muted mt-3 text-xs">Unlock the full song below →</p>
     </div>
   );
@@ -376,7 +345,7 @@ function CraftingMessage({ idx, name }: { idx: number; name: string }) {
 // ── Main component ───────────────────────────────────────────────────────────
 
 const DRAFT_KEY = 'songforme_draft';
-const PERSISTABLE_STEPS: StepId[] = ['freeform', 'vibe', 'music', 'email'];
+const PERSISTABLE_STEPS: StepId[] = ['freeform', 'clarify', 'preview'];
 
 function readDraft() {
   if (typeof window === 'undefined') return null;
@@ -388,6 +357,8 @@ function readDraft() {
     if (!Array.isArray(p.messages)) return null;
     // If we're past step 1 but freeform answer is missing, recover to freeform with text
     if (p.step !== 'freeform' && !p.answers?.freeform) return { ...p, step: 'freeform' };
+    // Preview step requires pre-generated lyrics — without them it's not recoverable
+    if (p.step === 'preview' && !p.preGenData) return { ...p, step: 'freeform' };
     return p;
   } catch {
     return null;
@@ -401,15 +372,18 @@ export default function CreateContent() {
   ]);
   const [answers, setAnswers] = useState<Partial<IntakeAnswers>>({});
   const [freeformText, setFreeformText] = useState<string>('');
-  const [musicInput, setMusicInput] = useState('');
-  const [musicInputFocused, setMusicInputFocused] = useState(false);
   const [error, setError] = useState('');
+  const [clarifyQuestions, setClarifyQuestions] = useState<string[]>([]);
+  const [clarifyAnswers, setClarifyAnswers] = useState<Record<number, string>>({});
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   // Pre-generated lyrics from /api/generate-preview — passed to /api/intake on pay
   const [preGenData, setPreGenData] = useState<{ lyrics: string; sunoStyle: string } | null>(null);
   const [botTyping, setBotTyping] = useState(false);
   const [craftingMsgIdx, setCraftingMsgIdx] = useState(0);
   const [genProgress, setGenProgress] = useState(0);
+  const [clarifyRound, setClarifyRound] = useState<1 | 2>(1);
+  const [enrichedFreeform, setEnrichedFreeform] = useState('');
+  const [clarifySourceText, setClarifySourceText] = useState('');
 
   // Typewriter — active only when textarea is empty and unfocused on step 1
   const [textareaFocused, setTextareaFocused] = useState(false);
@@ -451,6 +425,13 @@ export default function CreateContent() {
       setMessages(d.messages);
       setAnswers(d.answers ?? {});
       setFreeformText(d.freeformText ?? '');
+      if (d.clarifyQuestions) setClarifyQuestions(d.clarifyQuestions);
+      if (d.clarifyAnswers) setClarifyAnswers(d.clarifyAnswers);
+      if (d.clarifyRound) setClarifyRound(d.clarifyRound as 1 | 2);
+      if (d.enrichedFreeform) setEnrichedFreeform(d.enrichedFreeform);
+      if (d.clarifySourceText) setClarifySourceText(d.clarifySourceText);
+      if (d.preGenData) setPreGenData(d.preGenData);
+      if (d.previewData) setPreviewData(d.previewData);
     }
     // Enable smooth scrolling after the initial render + any draft restoration has settled.
     // Double rAF ensures we're past the commit cycle triggered by the state updates above.
@@ -473,18 +454,45 @@ export default function CreateContent() {
   // Persist full intake draft to localStorage so refresh at any step restores where they left off
   useEffect(() => {
     if (!PERSISTABLE_STEPS.includes(step)) return;
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, freeformText, answers, messages }));
-  }, [step, freeformText, answers, messages]);
+    localStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({
+        step,
+        freeformText,
+        answers,
+        messages,
+        clarifyQuestions,
+        clarifyAnswers,
+        clarifyRound,
+        enrichedFreeform,
+        clarifySourceText,
+        preGenData,
+        previewData,
+      })
+    );
+  }, [
+    step,
+    freeformText,
+    answers,
+    messages,
+    clarifyQuestions,
+    clarifyAnswers,
+    clarifyRound,
+    enrichedFreeform,
+    clarifySourceText,
+    preGenData,
+    previewData,
+  ]);
 
   // Cycle crafting messages while generation is in flight
   useEffect(() => {
     if (step !== 'generating') return;
     setCraftingMsgIdx(0);
-    const id = setInterval(() => setCraftingMsgIdx((i) => i + 1), 5000);
+    const id = setInterval(() => setCraftingMsgIdx((i) => i + 1), 8000);
     return () => clearInterval(id);
   }, [step]);
 
-  // Drive the fake progress bar: 0→85% over ~22s while generating
+  // Drive the fake progress bar: 0→85% over ~100s while generating
   useEffect(() => {
     if (step === 'generating') {
       const id = setTimeout(() => setGenProgress(85), 50);
@@ -532,24 +540,10 @@ export default function CreateContent() {
           delete n.freeform;
           return n;
         });
-        break;
-      case 'vibe':
-        setAnswers((p) => {
-          const n = { ...p };
-          delete n.vibe;
-          return n;
-        });
-        break;
-      case 'music':
-        {
-          const existingMusic = answers.musicReference ?? '';
-          setMusicInput(existingMusic);
-        }
-        setAnswers((p) => {
-          const n = { ...p };
-          delete n.musicReference;
-          return n;
-        });
+        // Keep clarifyQuestions/clarifySourceText cached — if user returns without changing
+        // their text, handleFreeformSubmit will skip the API call and reuse them.
+        setClarifyRound(1);
+        setEnrichedFreeform('');
         break;
     }
 
@@ -559,7 +553,7 @@ export default function CreateContent() {
 
   // ── Step handlers ──────────────────────────────────────────────────────────
 
-  function handleFreeformSubmit() {
+  async function handleFreeformSubmit() {
     const text = freeformText.trim();
     if (!text) {
       setError('Tell us something about them — even a few sentences helps.');
@@ -572,65 +566,124 @@ export default function CreateContent() {
       return;
     }
 
-    const name = parseName(text);
     setAnswers((p) => ({ ...p, freeform: text }));
 
     const preview = text.length > 120 ? text.slice(0, 120).replace(/\s+\S*$/, '') + '…' : text;
-
+    // Cache hit — same text as last time, questions already generated, skip the API call
+    if (text === clarifySourceText && clarifyQuestions.length > 0) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user', text: preview },
+        { role: 'bot', text: "A few quick questions that'll make this song way more personal:" },
+      ]);
+      setStep('clarify');
+      return;
+    }
     setMessages((prev) => [...prev, { role: 'user', text: preview }]);
     setBotTyping(true);
     setError('');
     analytics.intakeStep({ step: 'freeform' });
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'bot', text: getBotQuestion('vibe', name) }]);
-      setStep('vibe');
-      setBotTyping(false);
-    }, 850);
-  }
 
-  function handleVibeSelect(vibe: VibeType, displayLabel?: string) {
-    const label = displayLabel ?? VIBE_OPTIONS.find((v) => v.value === vibe)?.label ?? vibe;
-    setAnswers((p) => ({ ...p, vibe }));
-    setMusicInput('');
-    setMusicInputFocused(false);
-    setMessages((prev) => [...prev, { role: 'user', text: label }]);
-    setBotTyping(true);
-    setError('');
-    analytics.intakeStep({ step: 'vibe' });
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'bot', text: getBotQuestion('music', parsedName) }]);
-      setStep('music');
-      setBotTyping(false);
-    }, 850);
-  }
+    // Fire clarify while keeping botTyping true
+    const clarifyFetch = fetch('/api/clarify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ freeformContext: text, round: 1 }),
+    });
 
-  async function handleMusicSubmit() {
-    const music = musicInput.trim();
-    if (!music) {
-      setError('Pick a genre or tell us an artist — anything helps.');
-      return;
+    await new Promise<void>((r) => setTimeout(r, 850));
+
+    try {
+      const clarifyRes = await clarifyFetch;
+      if (clarifyRes.ok) {
+        const { questions } = (await clarifyRes.json()) as { questions: string[] };
+        if (Array.isArray(questions) && questions.length > 0) {
+          setClarifyQuestions(questions);
+          setClarifySourceText(text);
+          setClarifyAnswers({});
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'bot',
+              text: "A few quick questions that'll make this song way more personal:",
+            },
+          ]);
+          setBotTyping(false);
+          setStep('clarify');
+          return;
+        }
+      }
+    } catch {
+      // Clarify failure is non-fatal — fall through to generating
     }
-    setAnswers((p) => ({ ...p, musicReference: music }));
-    setMessages((prev) => [...prev, { role: 'user', text: music }]);
-    setBotTyping(true);
-    setError('');
-    analytics.intakeStep({ step: 'music' });
 
-    // Fire generation immediately — runs in parallel with the 850ms typing delay
+    // Clarify unavailable or returned no questions — go straight to generating
+    setBotTyping(false);
+    await startGenerating(text, {}, 'freeform');
+  }
+
+  function handleClarifySubmit(skip: boolean) {
+    if (clarifyRound === 2 || skip) {
+      const base = enrichedFreeform || freeformText.trim();
+      const enrichedAnswers = skip ? {} : clarifyAnswers;
+      analytics.intakeStep({ step: 'clarify' });
+      void startGenerating(base, enrichedAnswers, 'clarify');
+    } else {
+      // Round 1 complete — build enriched context and fire round 2
+      const enrichedContext = buildEnrichedBrief(
+        freeformText.trim(),
+        clarifyQuestions,
+        clarifyAnswers
+      );
+      setEnrichedFreeform(enrichedContext);
+      analytics.intakeStep({ step: 'clarify' });
+      void fireRound2Clarify(enrichedContext);
+    }
+  }
+
+  async function fireRound2Clarify(enrichedContext: string) {
+    setBotTyping(true);
+    try {
+      const res = await fetch('/api/clarify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ freeformContext: enrichedContext, round: 2 }),
+      });
+      if (res.ok) {
+        const { questions } = (await res.json()) as { questions: string[] };
+        if (Array.isArray(questions) && questions.length > 0) {
+          setClarifyRound(2);
+          setClarifyQuestions(questions);
+          setClarifyAnswers({});
+          setMessages((prev) => [...prev, { role: 'bot', text: 'Just a couple more things:' }]);
+          setBotTyping(false);
+          return;
+        }
+      }
+    } catch {
+      // Fall through to generating
+    }
+    // No round 2 questions or error — go straight to generating
+    setBotTyping(false);
+    await startGenerating(enrichedContext, {}, 'clarify');
+  }
+
+  async function startGenerating(
+    freeform: string,
+    enrichedAnswers: Record<number, string>,
+    fallbackStep: StepId
+  ) {
+    const enrichedContext = buildEnrichedBrief(freeform, clarifyQuestions, enrichedAnswers);
+    setStep('generating');
+
     const genFetch = fetch('/api/generate-preview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        freeformContext: freeformText.trim(),
+        freeformContext: enrichedContext,
         parsedName: parsedName || '',
-        vibe: answers.vibe,
-        musicReference: music,
       }),
     });
-
-    await new Promise<void>((r) => setTimeout(r, 850));
-    setStep('generating');
-    setBotTyping(false);
 
     try {
       const genRes = await genFetch;
@@ -651,10 +704,26 @@ export default function CreateContent() {
       setPreviewData({ lyricsPreview, stripeUrl: '' });
       setStep('preview');
     } catch (err) {
-      setStep('music');
+      setStep(fallbackStep);
       const msg = err instanceof Error ? err.message : null;
       setError(msg || `Something went sideways — try again.`);
     }
+  }
+
+  function buildEnrichedBrief(
+    freeform: string,
+    questions: string[],
+    answers: Record<number, string>
+  ): string {
+    const additions = questions
+      .map((q, i) => {
+        const a = answers[i]?.trim();
+        return a ? `Q: ${q}\nA: ${a}` : null;
+      })
+      .filter(Boolean);
+
+    if (additions.length === 0) return freeform;
+    return `${freeform}\n\n[Additional details]\n${additions.join('\n\n')}`;
   }
 
   async function handlePayCTA() {
@@ -668,8 +737,6 @@ export default function CreateContent() {
         body: JSON.stringify({
           freeformContext: freeformText.trim(),
           parsedName: parsedName || '',
-          vibe: answers.vibe,
-          musicReference: answers.musicReference,
           preGeneratedLyrics: preGenData.lyrics,
           preGeneratedStyle: preGenData.sunoStyle,
         }),
@@ -684,7 +751,6 @@ export default function CreateContent() {
       const { stripeUrl } = (await res.json()) as { stripeUrl: string | null; orderId: string };
       if (!stripeUrl) throw new Error('Payment link unavailable — please try again.');
 
-      localStorage.removeItem(DRAFT_KEY);
       analytics.intakeCompleted({ name: displayName });
       window.location.href = stripeUrl;
     } catch (err) {
@@ -697,6 +763,7 @@ export default function CreateContent() {
 
   const name = parsedName || '';
   const stepIndex = STEP_ORDER.indexOf(step as (typeof STEP_ORDER)[number]);
+  // clarify is step index 2 of 3 — show at 66%. generating/preview always 100%
   const progress =
     step === 'generating' || step === 'preview' ? 100 : (stepIndex / STEP_ORDER.length) * 100;
   const showBack = stepIndex > 0 && step !== 'generating' && step !== 'preview' && !botTyping;
@@ -770,26 +837,6 @@ export default function CreateContent() {
             </div>
           ))}
 
-          {/* Step 2: Vibe quick replies — rendered in the chat thread, not the input panel */}
-          {step === 'vibe' && !botTyping && (
-            <div className="flex flex-col gap-2">
-              {VIBE_OPTIONS.map((v, i) => (
-                <button
-                  key={v.value}
-                  onClick={() => handleVibeSelect(v.value)}
-                  className="msg-in border-border bg-surface hover:border-accent flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors"
-                  style={{ animationDelay: `${300 + i * 120}ms` }}
-                >
-                  <span className="text-xl leading-none">{v.emoji}</span>
-                  <div>
-                    <div className="text-sm font-semibold">{v.label}</div>
-                    <div className="text-muted text-xs">{v.desc}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
           {/* Typing indicator — shown while bot is composing a response */}
           {botTyping && <TypingIndicator />}
 
@@ -801,7 +848,11 @@ export default function CreateContent() {
           {/* Lyrics preview card */}
           {step === 'preview' && previewData && (
             <div className="msg-in">
-              <LyricsPreviewCard lyricsPreview={previewData.lyricsPreview} name={name} />
+              <LyricsPreviewCard
+                lyricsPreview={previewData.lyricsPreview}
+                name={name}
+                sunoStyle={preGenData?.sunoStyle}
+              />
             </div>
           )}
 
@@ -816,12 +867,7 @@ export default function CreateContent() {
           {/* Typing — spacer keeps panel height stable during transitions */}
           {botTyping && <p className="text-muted py-3 text-center text-sm">&nbsp;</p>}
 
-          {/* Step 2: Vibe — hint keeps the input panel from collapsing to nothing (tiles are in the thread) */}
-          {step === 'vibe' && !botTyping && (
-            <p className="text-muted py-3 text-center text-sm">↑ Tap a vibe to continue</p>
-          )}
-
-          {/* Step 1: Freeform dump */}
+          {/* Step 1: Freeform */}
           {step === 'freeform' && !botTyping && (
             <div className="space-y-2">
               <div className="relative">
@@ -871,45 +917,36 @@ export default function CreateContent() {
             </div>
           )}
 
-          {/* Step 3: Artist / genre input with chips as pre-fill helpers */}
-          {step === 'music' && !botTyping && (
-            <div className="space-y-2">
-              <div className="relative">
-                <Input
-                  value={musicInput}
-                  onChange={(e) => setMusicInput(e.target.value)}
-                  onFocus={() => setMusicInputFocused(true)}
-                  onBlur={() => setMusicInputFocused(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleMusicSubmit();
-                  }}
-                  className="text-base"
-                />
-                {/* Typewriter placeholder — visible when input is empty and unfocused */}
-                {!musicInput && !musicInputFocused && <MusicTypewriter />}
+          {/* Step 3: Clarify — Claude-generated follow-up questions */}
+          {step === 'clarify' && !botTyping && (
+            <div className="space-y-3">
+              {clarifyQuestions.map((question, i) => (
+                <div key={i} className="space-y-1">
+                  <label className="text-muted text-xs font-medium">{question}</label>
+                  <Input
+                    value={clarifyAnswers[i] ?? ''}
+                    onChange={(e) =>
+                      setClarifyAnswers((prev) => ({ ...prev, [i]: e.target.value }))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleClarifySubmit(false);
+                    }}
+                    className="text-base"
+                  />
+                </div>
+              ))}
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={() => handleClarifySubmit(true)}
+                >
+                  Generate anyway →
+                </Button>
+                <Button className="flex-1" onClick={() => handleClarifySubmit(false)}>
+                  Let&apos;s go →
+                </Button>
               </div>
-              {/* Genre chips — tap to pre-fill the input, then user can add an artist */}
-              <div className="flex flex-wrap gap-1.5">
-                {MUSIC_PRESET_OPTIONS.map((genre) => (
-                  <button
-                    key={genre}
-                    type="button"
-                    onPointerDown={(e) => e.preventDefault()}
-                    onClick={() => setMusicInput(genre)}
-                    className={cn(
-                      'min-h-11 rounded-full border px-3 py-1.5 text-sm transition-colors',
-                      musicInput === genre
-                        ? 'border-accent bg-accent/10 text-accent'
-                        : 'border-border text-muted hover:border-accent hover:text-text'
-                    )}
-                  >
-                    {genre}
-                  </button>
-                ))}
-              </div>
-              <Button onClick={handleMusicSubmit} className="w-full">
-                Continue →
-              </Button>
             </div>
           )}
 
@@ -921,10 +958,7 @@ export default function CreateContent() {
                   className="bg-accent h-full rounded-full"
                   style={{
                     width: `${genProgress}%`,
-                    transition:
-                      genProgress === 0
-                        ? 'none'
-                        : 'width 22000ms cubic-bezier(0.1, 0.4, 0.7, 0.95)',
+                    transition: genProgress === 0 ? 'none' : 'width 100000ms ease-in-out',
                   }}
                 />
               </div>

@@ -23,10 +23,7 @@ export async function POST(req: Request): Promise<Response> {
 
     if (!secretKey || !priceId) {
       log.warn(ctx.reqId, 'Stripe not configured');
-      return log.end(
-        ctx,
-        Response.json({ error: 'Payment service unavailable' }, { status: 503 }),
-      );
+      return log.end(ctx, Response.json({ error: 'Payment service unavailable' }, { status: 503 }));
     }
 
     const stripe = new Stripe(secretKey);
@@ -39,7 +36,7 @@ export async function POST(req: Request): Promise<Response> {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}?paid=true`,
-      cancel_url: origin,
+      cancel_url: `${origin}/create`,
     });
 
     log.info(ctx.reqId, 'Checkout session created', { sessionId: session.id });

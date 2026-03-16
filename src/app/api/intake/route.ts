@@ -2,19 +2,16 @@ import { createRouteLogger } from '@/lib/route-logger';
 import Anthropic from '@anthropic-ai/sdk';
 import { supabaseAdmin } from '@/lib/supabase';
 import Stripe from 'stripe';
-import type { IntakeData, VibeType } from '@/lib/types';
+import type { IntakeData } from '@/lib/types';
 import { SONG_GENERATION_SYSTEM_PROMPT } from '@/content/prompts/song-generation';
 
 const log = createRouteLogger('intake');
 
-const VALID_VIBES: VibeType[] = ['heartfelt', 'hype', 'roast', 'kids', 'surprise'];
 const MIN_FREEFORM_WORDS = 15;
 
 interface IntakeBody {
   freeformContext: string;
   parsedName?: string;
-  vibe: VibeType;
-  musicReference: string;
   // Pre-generated lyrics/style from /api/generate-preview — skips Claude call
   preGeneratedLyrics?: string;
   preGeneratedStyle?: string;
@@ -38,13 +35,6 @@ export async function POST(req: Request): Promise<Response> {
         )
       );
     }
-    if (!body.vibe || !VALID_VIBES.includes(body.vibe)) {
-      return log.end(ctx, Response.json({ error: 'Invalid vibe' }, { status: 400 }));
-    }
-    if (!body.musicReference?.trim()) {
-      return log.end(ctx, Response.json({ error: 'Music reference is required' }, { status: 400 }));
-    }
-
     // ── Validate env vars ───────────────────────────────────────────────────
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -59,8 +49,6 @@ export async function POST(req: Request): Promise<Response> {
 
     const intake: IntakeData = {
       freeformContext: freeform.slice(0, 3000),
-      vibe: body.vibe,
-      musicReference: body.musicReference.trim().slice(0, 300),
     };
 
     // ── Generate lyrics + Suno style via Claude (or use pre-generated) ────
@@ -79,7 +67,7 @@ export async function POST(req: Request): Promise<Response> {
       const userMessage = buildUserMessage(intake);
 
       const claudeRes = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4000,
         system: SONG_GENERATION_SYSTEM_PROMPT,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,11 +81,10 @@ export async function POST(req: Request): Promise<Response> {
         throw new Error('Unexpected Claude response type');
 
       try {
-        const clean = rawContent.text
-          .replace(/^```json\s*/i, '')
-          .replace(/```\s*$/, '')
-          .trim();
-        generated = JSON.parse(clean);
+        // Claude sometimes wraps JSON in prose or markdown — extract the object directly
+        const jsonMatch = rawContent.text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('No JSON object found');
+        generated = JSON.parse(jsonMatch[0]);
       } catch {
         throw new Error('Failed to parse Claude response as JSON');
       }
@@ -128,7 +115,7 @@ export async function POST(req: Request): Promise<Response> {
 
     // ── Create Stripe Checkout Session ─────────────────────────────────────
     const stripe = new Stripe(stripeKey);
-    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
+    const origin = new URL(req.url).origin;
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -137,7 +124,6 @@ export async function POST(req: Request): Promise<Response> {
       cancel_url: `${origin}/create`,
       metadata: { orderId: order.id },
       allow_promotion_codes: true,
-      payment_method_collection: 'if_required',
     });
 
     await db.from('orders').update({ stripe_session_id: session.id }).eq('id', order.id);
@@ -166,9 +152,6 @@ function buildUserMessage(intake: IntakeData): string {
     `About the birthday person (their story, quirks, relationships, and details are all in here):`,
     '',
     intake.freeformContext,
-    '',
-    `Vibe: ${intake.vibe}`,
-    `Sound/genre reference: ${intake.musicReference}`,
     '',
     `Use web search to research the sound and style of any artists, genres, or cultural references mentioned above before writing. Search broadly — the more specific and current your knowledge, the better the song.`,
   ].join('\n');

@@ -1,18 +1,16 @@
 import { createRouteLogger } from '@/lib/route-logger';
 import Anthropic from '@anthropic-ai/sdk';
-import type { IntakeData, VibeType } from '@/lib/types';
+import type { IntakeData } from '@/lib/types';
 import { SONG_GENERATION_SYSTEM_PROMPT } from '@/content/prompts/song-generation';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const log = createRouteLogger('generate-preview');
 
-const VALID_VIBES: VibeType[] = ['heartfelt', 'hype', 'roast', 'kids', 'surprise'];
 const MIN_FREEFORM_WORDS = 15;
 
 interface GeneratePreviewBody {
   freeformContext: string;
   parsedName?: string;
-  vibe: VibeType;
-  musicReference: string;
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -33,13 +31,6 @@ export async function POST(req: Request): Promise<Response> {
         )
       );
     }
-    if (!body.vibe || !VALID_VIBES.includes(body.vibe)) {
-      return log.end(ctx, Response.json({ error: 'Invalid vibe' }, { status: 400 }));
-    }
-    if (!body.musicReference?.trim()) {
-      return log.end(ctx, Response.json({ error: 'Music reference is required' }, { status: 400 }));
-    }
-
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     if (!anthropicKey) {
       log.warn(ctx.reqId, 'Missing ANTHROPIC_API_KEY');
@@ -48,8 +39,6 @@ export async function POST(req: Request): Promise<Response> {
 
     const intake: IntakeData = {
       freeformContext: freeform.slice(0, 3000),
-      vibe: body.vibe,
-      musicReference: body.musicReference.trim().slice(0, 300),
     };
 
     // ── Generate lyrics + Suno style via Claude ────────────────────────────
@@ -57,7 +46,7 @@ export async function POST(req: Request): Promise<Response> {
     const anthropic = new Anthropic({ apiKey: anthropicKey });
 
     const claudeRes = await anthropic.messages.create({
-      model: 'claude-opus-4-6',
+      model: 'claude-sonnet-4-6',
       max_tokens: 4000,
       system: SONG_GENERATION_SYSTEM_PROMPT,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,16 +61,28 @@ export async function POST(req: Request): Promise<Response> {
 
     let generated: { lyrics: string; suno_style: string };
     try {
-      const clean = rawContent.text
-        .replace(/^```json\s*/i, '')
-        .replace(/```\s*$/, '')
-        .trim();
-      generated = JSON.parse(clean);
+      // Claude sometimes wraps JSON in prose or markdown — extract the object directly
+      const jsonMatch = rawContent.text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON object found');
+      generated = JSON.parse(jsonMatch[0]);
     } catch {
       throw new Error('Failed to parse Claude response as JSON');
     }
 
     log.info(ctx.reqId, 'Lyrics generated', { chars: generated.lyrics.length });
+
+    // Fire-and-forget — log this preview to Supabase for conversion tracking
+    supabaseAdmin()
+      .from('previews')
+      .insert({
+        recipient_name: body.parsedName ?? '',
+        freeform_context: freeform.slice(0, 3000),
+        lyrics: generated.lyrics,
+        suno_style: generated.suno_style,
+      })
+      .then(({ error }) => {
+        if (error) log.warn(ctx.reqId, 'Failed to log preview', { error: error.message });
+      });
 
     const lyricsPreview = generated.lyrics
       .split('\n')
@@ -108,9 +109,6 @@ function buildUserMessage(intake: IntakeData): string {
     `About the birthday person (their story, quirks, relationships, and details are all in here):`,
     '',
     intake.freeformContext,
-    '',
-    `Vibe: ${intake.vibe}`,
-    `Sound/genre reference: ${intake.musicReference}`,
     '',
     `Use web search to research the sound and style of any artists, genres, or cultural references mentioned above before writing. Search broadly — the more specific and current your knowledge, the better the song.`,
   ].join('\n');

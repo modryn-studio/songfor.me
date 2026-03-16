@@ -12,7 +12,7 @@ The impulse gifter framing (below) describes _when_ people buy. This is _why the
 
 ## Product
 
-songfor.me — A personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, age, relationship, personality quirks, inside jokes, and preferred vibe/genre. Claude generates custom lyrics and a Suno style string. Songs are manually generated on Suno V5's web app (concierge model) and delivered via a unique shareable song page with email notification. The core promise: from impulse to sent gift in under 5 minutes of user effort, song delivered in ~15 minutes.
+songfor.me — A personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, age, relationship, personality quirks, inside jokes, and preferred vibe/genre. Claude generates custom lyrics and a Suno style string. Songs are manually generated on Suno V5's web app (concierge model) and delivered via a unique shareable song page with email notification. The core promise: from impulse to sent gift in under 5 minutes of user effort, song delivered same day.
 
 The core competitive advantage is the founder's battle-tested prompting system — the methodology for translating personal details (personality quirks, inside jokes, memories, relationship dynamics) into lyrics + Suno style strings that produce emotionally resonant songs. This is the IP. Competitors ask for a name and genre. songfor.me captures stories. The prompt system is encoded in Claude system prompts stored in `/content/prompts/`.
 
@@ -106,7 +106,7 @@ Previous versions (for reference if encountering legacy content):
 
 - `/` → Landing page. Hero + single CTA ("Start their song →"). Email capture for non-buyers.
 - `/create` → Conversational intake UI. Claude-powered chat (NOT a static form — this is a key differentiator). Collects: recipient name, age, relationship to buyer, 3 personality facts/quirks/inside jokes (things that are "so them" — hobbies, phrases they say, running jokes, memories), vibe (roast / heartfelt / hype / kids bop), genre preference (or "what genre feels like them?"). The conversational format makes the intake feel like writing a love letter, not filling out a form. Ends with order summary + Stripe Payment Link redirect.
-- `/create/confirmed` → Post-payment confirmation. "Your song is being crafted ✨ We'll email you at [email] in ~15 minutes." Confetti animation. Share-the-anticipation CTA.
+- `/create/confirmed` → Post-payment confirmation. "Your song is being crafted ✨ We'll email you at [email] as soon as it's ready." Confetti animation. Share-the-anticipation CTA.
 - `/song/[id]` → Public shareable song page. Audio player, lyrics display, recipient name, share buttons (copy link, text, social). This is the gift URL that gets forwarded to the birthday person.
 - `/admin` → Password-protected admin dashboard (for founder only). View pending orders, upload MP3, paste lyrics, mark order as done (triggers Resend delivery email). Simple table UI. This is the manual fulfillment interface.
 - `/privacy` → Auto-generated.
@@ -160,7 +160,7 @@ Reddit is hostile to AI product promotion. Existing posts about AI birthday song
 4. **Supabase over Vercel KV.** Need relational data (orders, songs, emails), file storage (MP3s), and row-level queries (admin dashboard). KV is too simple. Supabase free tier covers early scale.
 5. **Vercel Pro required.** Hobby plan prohibits commercial use. $20/mo is a cost of doing business from day one.
 6. **No Suno API dependency in v1.** Official API doesn't exist. Unofficial wrappers are unstable (GoAPI and PiAPI both recently shut down). Build the abstraction layer interface but implement manual fulfillment behind it. When a stable API emerges, swap the implementation without changing the product.
-7. **Impulse purchase UX truth.** Birthday songs are zero-lead-time purchases. The product must feel instant to the buyer (intake < 2 min), even though generation is async (~15 min). The submit moment must feel like the gift is already on its way.
+7. **Impulse purchase UX truth.** Birthday songs are zero-lead-time purchases. The product must feel instant to the buyer (intake < 2 min), even though generation is async (same day). The submit moment must feel like the gift is already on its way.
 8. **Price at $9.99.** High enough to filter freeloaders, low enough for impulse buy. Aligns with Tier 2 monetization strategy. Raise price when demand exceeds manual fulfillment capacity.
 9. **Data collection from day one.** Log every generation: intake inputs, Claude outputs (lyrics + style string), Suno parameters, which songs get shared/played. This is the training data flywheel for the prompt system. When automation arrives, this data determines what inputs → great outputs.
 10. **pSEO pages are month-2+ play.** Templates: "birthday song for [relationship]", "personalized [genre] birthday song", "birthday song generator for [age]". Don't build during v1 sprint. Plant seeds after launch.

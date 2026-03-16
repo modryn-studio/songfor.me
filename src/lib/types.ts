@@ -1,10 +1,7 @@
 export type OrderStatus = 'pending_payment' | 'paid' | 'generating' | 'done' | 'delivered';
-export type VibeType = 'heartfelt' | 'hype' | 'roast' | 'kids' | 'surprise';
 
 export interface IntakeData {
   freeformContext: string;
-  vibe: VibeType;
-  musicReference: string;
 }
 
 export interface Order {
@@ -30,4 +27,13 @@ export interface Song {
   suno_style: string;
   audio_url: string | null;
   is_public: boolean;
+}
+
+export interface Preview {
+  id: string;
+  created_at: string;
+  recipient_name: string;
+  freeform_context: string;
+  lyrics: string | null;
+  suno_style: string | null;
 }

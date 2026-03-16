@@ -9,7 +9,7 @@ import ConfirmedContent from './page-content';
 export const metadata: Metadata = {
   title: `Song on its way! — ${site.name}`,
   description:
-    "Your personalized birthday song is being crafted. We'll email it to you in ~15 minutes.",
+    "Your personalized birthday song is being crafted. We'll email it to you as soon as it's ready.",
   robots: { index: false },
 };
 

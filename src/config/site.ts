@@ -9,14 +9,14 @@ export const site = {
     "Make a personalized birthday song in minutes. Tell us their quirks, inside jokes, and vibe — we'll deliver a one-of-a-kind song they'll never forget.",
   ogTitle: "songfor.me — A Birthday Song They'll Never Forget",
   ogDescription:
-    "Tell us about them — their name, their quirks, their inside jokes. We'll craft a personalized birthday song and deliver it in minutes. $9.99.",
+    "Tell us about them — their name, their quirks, their inside jokes. We'll craft a personalized birthday song and deliver it to your inbox. $9.99.",
   cta: 'Start their song for $9.99 →',
   founder: 'Luke Hanner',
   email: 'hello@modrynstudio.com',
   waitlist: {
     headline: 'Know someone with a birthday coming up?',
     subheadline:
-      'Give them the gift no one else will — a song made just for them, delivered in minutes.',
+      'Give them the gift no one else will — a song made just for them, delivered to your inbox.',
     success: "We'll be in touch. In the meantime, start their song now.",
   },
   accent: '#FF6B6B',

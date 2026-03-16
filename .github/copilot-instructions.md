@@ -2,7 +2,7 @@
 
 ## Who I Am
 
-I'm Luke Hanner — a solo founder building songfor.me, a personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, quirks, inside jokes, and preferred vibe and genre. Claude generates custom lyrics and a Suno style string. Songs are manually generated on Suno V5 (concierge model) and delivered via a shareable song page with email notification. $9.99/song, delivered in ~15 minutes.
+I'm Luke Hanner — a solo founder building songfor.me, a personalized birthday song generator. Users complete a conversational intake (powered by Claude) that captures the recipient's name, quirks, inside jokes, and preferred vibe and genre. Claude generates custom lyrics and a Suno style string. Songs are manually generated on Suno V5 (concierge model) and delivered via a shareable song page with email notification. $9.99/song, delivered same day.
 
 **Why it works:** A song is the only gift that lives inside someone. Not on a shelf — in their head. The birthday girl asks to hear it again before it's over. A 6-year-old still requests his song months later. Most gifts say "I was thinking of you." A personalized song says "I _know_ you." The purchase is often impulse — the product is the opposite of impulsive. It's the most specific, personal gift you can give, and it takes five minutes to order.
 

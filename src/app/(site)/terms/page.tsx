@@ -4,7 +4,7 @@ import { site } from '@/config/site';
 export const metadata: Metadata = {
   title: `Terms of Service — ${site.name} Birthday Song Generator`,
   description:
-    'Terms for using songfor.me. $9.99 per song, delivered to your email in ~15 minutes. Read our usage rules, refund policy, and licensing terms.',
+    'Terms for using songfor.me. $9.99 per song, delivered to your email same day. Read our usage rules, refund policy, and licensing terms.',
 };
 
 export default function TermsPage() {
