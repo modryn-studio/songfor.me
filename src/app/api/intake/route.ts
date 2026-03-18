@@ -12,7 +12,6 @@ const MIN_FREEFORM_WORDS = 15;
 interface IntakeBody {
   freeformContext: string;
   parsedName?: string;
-  // Pre-generated lyrics/style from /api/generate-preview — skips Claude call
   preGeneratedLyrics?: string;
   preGeneratedStyle?: string;
 }

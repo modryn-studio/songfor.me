@@ -2,6 +2,8 @@ export type OrderStatus = 'pending_payment' | 'paid' | 'generating' | 'done' | '
 
 export interface IntakeData {
   freeformContext: string;
+  vibe?: string;
+  musicReference?: string;
 }
 
 export interface Order {

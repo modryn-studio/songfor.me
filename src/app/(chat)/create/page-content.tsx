@@ -9,11 +9,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-type StepId = 'freeform' | 'clarify' | 'generating' | 'preview';
+type StepId = 'freeform' | 'interview' | 'clarify' | 'generating' | 'preview';
 
 interface Message {
   role: 'bot' | 'user';
   text: string;
+}
+
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 interface IntakeAnswers {
@@ -32,6 +37,15 @@ const PLACEHOLDER_EXAMPLES = [
   'Nick is turning 37. His girlfriend Kathy calls him Slay Baddie Snickers. He loves jet skis and just got a new motorcycle. Small party with the kids in his cool basement...',
   "Paula is turning 34, pregnant with baby Alex. I'm her husband Luke. We have an 8 yr old Aria, a dog Snowbell, and four cats. She collects plants and Pokémon cards...",
 ];
+
+const ARTIST_EXAMPLES = [
+  'Drake',
+  'Johnny Cash',
+  'Taylor Swift',
+  'Kendrick Lamar',
+  'Metallica',
+  'Beyoncé',
+] as const;
 
 // ── Typewriter hook ──────────────────────────────────────────────────────────
 
@@ -199,8 +213,13 @@ const NAME_BLOCKLIST = new Set([
 
 function parseName(text: string): string {
   const patterns = [
-    /(?:name is|named|for|called)\s+([A-Z][a-z]+)/i,
+    // Birthday-person-specific signals first
     /\b([A-Z][a-z]+)\s+is\s+turning\b/,
+    /\b([A-Z][a-z]+)\s+turns\s+\d/,
+    /(?:song for|birthday for|making.*?for|it's for)\s+([A-Z][a-z]+)/i,
+    /(?:his|her|their)\s+name\s+is\s+([A-Z][a-z]+)/i,
+    // Fallback: generic "named/for/called" — less reliable in context-rich briefs
+    /(?:^|\bsong\b.*?)\bfor\s+([A-Z][a-z]+)/i,
     /^([A-Z][a-z]+)\b/,
   ];
   for (const p of patterns) {
@@ -213,7 +232,7 @@ function parseName(text: string): string {
 
 // ── Quality ring ─────────────────────────────────────────────────────────────
 
-function QualityRing({ score }: { score: number }) {
+function QualityRing({ score, className }: { score: number; className?: string }) {
   const radius = 18;
   const circ = 2 * Math.PI * radius;
   const fill = (score / 100) * circ;
@@ -226,7 +245,7 @@ function QualityRing({ score }: { score: number }) {
         : 'A few more details will make this hit';
 
   return (
-    <div className="flex shrink-0 flex-col items-center gap-0.5" title={label}>
+    <div className={cn('flex shrink-0 flex-col items-center gap-0.5', className)} title={label}>
       <div className="relative h-11 w-11">
         <svg className="-rotate-90" width="44" height="44" viewBox="0 0 44 44">
           <circle cx="22" cy="22" r={radius} fill="none" stroke="#e8ded6" strokeWidth="3.5" />
@@ -254,12 +273,15 @@ function QualityRing({ score }: { score: number }) {
   );
 }
 
-const STEP_ORDER: StepId[] = ['freeform', 'clarify'];
+const STEP_ORDER: StepId[] = ['freeform', 'interview', 'clarify'];
+
+const STATIC_GENRE_OPTIONS = ['Pop', 'Country', 'Hip-hop', 'Rock'];
 
 function getBotQuestion(step: StepId, _name: string): string {
   switch (step) {
     case 'freeform':
-      return "Tell us about them — their name, age, any nicknames, hobbies, inside jokes, and who'll be celebrating with them.";
+      return "Tell me about them — just write like you're texting a friend. The more personal, the better.";
+    case 'interview':
     case 'clarify':
       return '';
     default:
@@ -345,7 +367,7 @@ function CraftingMessage({ idx, name }: { idx: number; name: string }) {
 // ── Main component ───────────────────────────────────────────────────────────
 
 const DRAFT_KEY = 'songforme_draft';
-const PERSISTABLE_STEPS: StepId[] = ['freeform', 'clarify', 'preview'];
+const PERSISTABLE_STEPS: StepId[] = ['freeform', 'interview', 'clarify', 'preview'];
 
 function readDraft() {
   if (typeof window === 'undefined') return null;
@@ -357,6 +379,14 @@ function readDraft() {
     if (!Array.isArray(p.messages)) return null;
     // If we're past step 1 but freeform answer is missing, recover to freeform with text
     if (p.step !== 'freeform' && !p.answers?.freeform) return { ...p, step: 'freeform' };
+    // Interview step requires genre options and the question text
+    if (p.step === 'interview' && (!Array.isArray(p.genreOptions) || !p.interviewQuestion)) {
+      return { ...p, step: 'freeform' };
+    }
+    // Clarify step requires conversationHistory — without it we can't call /api/converse
+    if (p.step === 'clarify' && !Array.isArray(p.conversationHistory)) {
+      return { ...p, step: 'freeform' };
+    }
     // Preview step requires pre-generated lyrics — without them it's not recoverable
     if (p.step === 'preview' && !p.preGenData) return { ...p, step: 'freeform' };
     return p;
@@ -376,19 +406,23 @@ export default function CreateContent() {
   const [clarifyQuestions, setClarifyQuestions] = useState<string[]>([]);
   const [clarifyAnswers, setClarifyAnswers] = useState<Record<number, string>>({});
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
-  // Pre-generated lyrics from /api/generate-preview — passed to /api/intake on pay
   const [preGenData, setPreGenData] = useState<{ lyrics: string; sunoStyle: string } | null>(null);
   const [botTyping, setBotTyping] = useState(false);
   const [craftingMsgIdx, setCraftingMsgIdx] = useState(0);
   const [genProgress, setGenProgress] = useState(0);
-  const [clarifyRound, setClarifyRound] = useState<1 | 2>(1);
-  const [enrichedFreeform, setEnrichedFreeform] = useState('');
-  const [clarifySourceText, setClarifySourceText] = useState('');
+  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
+  const [interviewQuestion, setInterviewQuestion] = useState('');
+  const [genreOptions, setGenreOptions] = useState<string[]>([]);
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [favoriteArtist, setFavoriteArtist] = useState('');
 
   // Typewriter — active only when textarea is empty and unfocused on step 1
   const [textareaFocused, setTextareaFocused] = useState(false);
-  const showTypewriter = step === 'freeform' && !freeformText && !textareaFocused;
+  const showTypewriter = step === 'freeform' && !freeformText;
   const typewriterText = useTypewriter(PLACEHOLDER_EXAMPLES, showTypewriter);
+
+  const showArtistTypewriter = step === 'interview' && !favoriteArtist;
+  const artistTypewriterText = useTypewriter(ARTIST_EXAMPLES, showArtistTypewriter);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -422,14 +456,22 @@ export default function CreateContent() {
     const d = readDraft();
     if (d) {
       setStep(d.step);
-      setMessages(d.messages);
+      // Always rewrite the first bot message so copy changes take effect immediately
+      // without requiring the user to clear their localStorage draft.
+      const restoredMessages = d.messages.map((m: Message, i: number) =>
+        i === 0 && m.role === 'bot' ? { ...m, text: getBotQuestion('freeform', '') } : m
+      );
+      setMessages(restoredMessages);
       setAnswers(d.answers ?? {});
       setFreeformText(d.freeformText ?? '');
       if (d.clarifyQuestions) setClarifyQuestions(d.clarifyQuestions);
       if (d.clarifyAnswers) setClarifyAnswers(d.clarifyAnswers);
-      if (d.clarifyRound) setClarifyRound(d.clarifyRound as 1 | 2);
-      if (d.enrichedFreeform) setEnrichedFreeform(d.enrichedFreeform);
-      if (d.clarifySourceText) setClarifySourceText(d.clarifySourceText);
+      if (d.conversationHistory)
+        setConversationHistory(d.conversationHistory as ConversationMessage[]);
+      if (d.interviewQuestion) setInterviewQuestion(d.interviewQuestion);
+      if (d.genreOptions) setGenreOptions(d.genreOptions);
+      if (d.selectedGenre) setSelectedGenre(d.selectedGenre);
+      if (d.favoriteArtist) setFavoriteArtist(d.favoriteArtist);
       if (d.preGenData) setPreGenData(d.preGenData);
       if (d.previewData) setPreviewData(d.previewData);
     }
@@ -463,9 +505,11 @@ export default function CreateContent() {
         messages,
         clarifyQuestions,
         clarifyAnswers,
-        clarifyRound,
-        enrichedFreeform,
-        clarifySourceText,
+        conversationHistory,
+        interviewQuestion,
+        genreOptions,
+        selectedGenre,
+        favoriteArtist,
         preGenData,
         previewData,
       })
@@ -477,9 +521,11 @@ export default function CreateContent() {
     messages,
     clarifyQuestions,
     clarifyAnswers,
-    clarifyRound,
-    enrichedFreeform,
-    clarifySourceText,
+    conversationHistory,
+    interviewQuestion,
+    genreOptions,
+    selectedGenre,
+    favoriteArtist,
     preGenData,
     previewData,
   ]);
@@ -540,10 +586,11 @@ export default function CreateContent() {
           delete n.freeform;
           return n;
         });
-        // Keep clarifyQuestions/clarifySourceText cached — if user returns without changing
-        // their text, handleFreeformSubmit will skip the API call and reuse them.
-        setClarifyRound(1);
-        setEnrichedFreeform('');
+        setConversationHistory([]);
+        setInterviewQuestion('');
+        setGenreOptions([]);
+        setSelectedGenre('');
+        setFavoriteArtist('');
         break;
     }
 
@@ -569,161 +616,166 @@ export default function CreateContent() {
     setAnswers((p) => ({ ...p, freeform: text }));
 
     const preview = text.length > 120 ? text.slice(0, 120).replace(/\s+\S*$/, '') + '…' : text;
-    // Cache hit — same text as last time, questions already generated, skip the API call
-    if (text === clarifySourceText && clarifyQuestions.length > 0) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'user', text: preview },
-        { role: 'bot', text: "A few quick questions that'll make this song way more personal:" },
-      ]);
-      setStep('clarify');
-      return;
-    }
     setMessages((prev) => [...prev, { role: 'user', text: preview }]);
     setBotTyping(true);
     setError('');
     analytics.intakeStep({ step: 'freeform' });
 
-    // Fire clarify while keeping botTyping true
-    const clarifyFetch = fetch('/api/clarify', {
+    // Call /api/interview to get a tailored music question and genre chips
+    const interviewFetch = fetch('/api/interview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ freeformContext: text, round: 1 }),
+      body: JSON.stringify({ freeformContext: text }),
     });
 
     await new Promise<void>((r) => setTimeout(r, 850));
 
+    let question = 'What genre of music do they love? Any favorite artists?';
+    let genres = STATIC_GENRE_OPTIONS;
     try {
-      const clarifyRes = await clarifyFetch;
-      if (clarifyRes.ok) {
-        const { questions } = (await clarifyRes.json()) as { questions: string[] };
-        if (Array.isArray(questions) && questions.length > 0) {
-          setClarifyQuestions(questions);
-          setClarifySourceText(text);
-          setClarifyAnswers({});
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: 'bot',
-              text: "A few quick questions that'll make this song way more personal:",
-            },
-          ]);
-          setBotTyping(false);
-          setStep('clarify');
-          return;
-        }
+      const interviewRes = await interviewFetch;
+      if (interviewRes.ok) {
+        const data = (await interviewRes.json()) as { question?: string; genreOptions?: string[] };
+        if (data.question) question = data.question;
+        if (data.genreOptions?.length) genres = data.genreOptions;
       }
     } catch {
-      // Clarify failure is non-fatal — fall through to generating
+      // fallback values already set above
     }
 
-    // Clarify unavailable or returned no questions — go straight to generating
+    setInterviewQuestion(question);
+    setGenreOptions(genres);
+    setMessages((prev) => [...prev, { role: 'bot', text: question }]);
     setBotTyping(false);
-    await startGenerating(text, {}, 'freeform');
+    setStep('interview');
   }
 
   function handleClarifySubmit(skip: boolean) {
-    if (clarifyRound === 2 || skip) {
-      const base = enrichedFreeform || freeformText.trim();
-      const enrichedAnswers = skip ? {} : clarifyAnswers;
-      analytics.intakeStep({ step: 'clarify' });
-      void startGenerating(base, enrichedAnswers, 'clarify');
+    let history = conversationHistory;
+
+    // Build answers regardless — if all blank, treat as skip
+    const answersText = clarifyQuestions
+      .map((q, i) => {
+        const a = clarifyAnswers[i]?.trim();
+        return a ? `${q}\n${a}` : null;
+      })
+      .filter(Boolean)
+      .join('\n\n');
+
+    if (!skip && answersText) {
+      setMessages((prev) => [...prev, { role: 'user', text: answersText }]);
+      history = [
+        ...history,
+        { role: 'assistant', content: JSON.stringify(clarifyQuestions) },
+        { role: 'user', content: answersText },
+      ];
+      setConversationHistory(history);
     } else {
-      // Round 1 complete — build enriched context and fire round 2
-      const enrichedContext = buildEnrichedBrief(
-        freeformText.trim(),
-        clarifyQuestions,
-        clarifyAnswers
-      );
-      setEnrichedFreeform(enrichedContext);
-      analytics.intakeStep({ step: 'clarify' });
-      void fireRound2Clarify(enrichedContext);
+      // skip=true OR all answers blank — move forward with what we have
+      const skipMsg = 'No additional info needed, please write the song.';
+      setMessages((prev) => [...prev, { role: 'user', text: skipMsg }]);
+      history = [
+        ...history,
+        { role: 'assistant', content: JSON.stringify(clarifyQuestions) },
+        { role: 'user', content: skipMsg },
+      ];
+      setConversationHistory(history);
     }
+
+    analytics.intakeStep({ step: 'clarify' });
+    void sendToConverse(history);
   }
 
-  async function fireRound2Clarify(enrichedContext: string) {
-    setBotTyping(true);
-    try {
-      const res = await fetch('/api/clarify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ freeformContext: enrichedContext, round: 2 }),
-      });
-      if (res.ok) {
-        const { questions } = (await res.json()) as { questions: string[] };
-        if (Array.isArray(questions) && questions.length > 0) {
-          setClarifyRound(2);
-          setClarifyQuestions(questions);
-          setClarifyAnswers({});
-          setMessages((prev) => [...prev, { role: 'bot', text: 'Just a couple more things:' }]);
-          setBotTyping(false);
-          return;
-        }
-      }
-    } catch {
-      // Fall through to generating
-    }
-    // No round 2 questions or error — go straight to generating
-    setBotTyping(false);
-    await startGenerating(enrichedContext, {}, 'clarify');
-  }
-
-  async function startGenerating(
-    freeform: string,
-    enrichedAnswers: Record<number, string>,
-    fallbackStep: StepId
-  ) {
-    const enrichedContext = buildEnrichedBrief(freeform, clarifyQuestions, enrichedAnswers);
+  async function sendToConverse(history: ConversationMessage[]) {
+    // Fall back to interview if no clarify questions are loaded yet (first call from interview step)
+    const fallbackStep: StepId = clarifyQuestions.length > 0 ? 'clarify' : 'interview';
     setStep('generating');
 
-    const genFetch = fetch('/api/generate-preview', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        freeformContext: enrichedContext,
-        parsedName: parsedName || '',
-      }),
-    });
-
     try {
-      const genRes = await genFetch;
+      const res = await fetch('/api/converse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history,
+          parsedName: parsedName || '',
+        }),
+      });
 
-      if (!genRes.ok) {
-        const errBody = await genRes.json().catch(() => ({}));
-        const msg = (errBody as { error?: string }).error;
-        throw new Error(msg || 'Generation failed');
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error((errBody as { error?: string }).error || 'Converse failed');
       }
 
-      const { lyrics, sunoStyle, lyricsPreview } = (await genRes.json()) as {
-        lyrics: string;
-        sunoStyle: string;
-        lyricsPreview: string;
-      };
+      const data = (await res.json()) as
+        | { type: 'questions'; questions: string[] }
+        | { type: 'song'; lyrics: string; sunoStyle: string; lyricsPreview: string };
 
-      setPreGenData({ lyrics, sunoStyle });
-      setPreviewData({ lyricsPreview, stripeUrl: '' });
+      if (data.type === 'questions') {
+        setClarifyQuestions(data.questions);
+        setClarifyAnswers({});
+        setMessages((prev) => [
+          ...prev,
+          { role: 'bot', text: "A few quick questions that'll make this song way more personal:" },
+        ]);
+        setStep('clarify');
+        return;
+      }
+
+      // Song is ready
+      setPreGenData({ lyrics: data.lyrics, sunoStyle: data.sunoStyle });
+      setPreviewData({ lyricsPreview: data.lyricsPreview, stripeUrl: '' });
+      localStorage.removeItem(DRAFT_KEY);
       setStep('preview');
     } catch (err) {
       setStep(fallbackStep);
       const msg = err instanceof Error ? err.message : null;
-      setError(msg || `Something went sideways — try again.`);
+      setError(msg || 'Something went sideways — try again.');
     }
   }
 
-  function buildEnrichedBrief(
-    freeform: string,
-    questions: string[],
-    answers: Record<number, string>
-  ): string {
-    const additions = questions
-      .map((q, i) => {
-        const a = answers[i]?.trim();
-        return a ? `Q: ${q}\nA: ${a}` : null;
-      })
-      .filter(Boolean);
+  async function handleInterviewSubmit(surpriseMe: boolean) {
+    const genre = selectedGenre;
+    const artist = favoriteArtist.trim();
+    if (!surpriseMe && !genre && !artist) {
+      setError('Pick a genre or enter an artist to continue.');
+      return;
+    }
 
-    if (additions.length === 0) return freeform;
-    return `${freeform}\n\n[Additional details]\n${additions.join('\n\n')}`;
+    // Build user-facing summary message
+    let userMsg = '';
+    if (surpriseMe) {
+      userMsg = 'Surprise me ✨';
+    } else if (artist && genre && genre !== 'Surprise me') {
+      userMsg = `Sounds like ${artist}, ${genre.toLowerCase()} style`;
+    } else if (artist) {
+      userMsg = `Sounds like ${artist}`;
+    } else {
+      userMsg = genre;
+    }
+
+    // Build the music answer for Claude
+    const musicAnswer = surpriseMe
+      ? 'Surprise me — pick a genre and artist that best fit what you know about them.'
+      : [genre && genre !== 'Surprise me' ? genre : '', artist ? `Sounds like ${artist}` : '']
+          .filter(Boolean)
+          .join('. ');
+
+    setMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
+    setBotTyping(true);
+    setError('');
+
+    // Build 3-message history: freeform brief → interview Q → user's music answer
+    const initialHistory: ConversationMessage[] = [
+      { role: 'user', content: freeformText.trim() },
+      { role: 'assistant', content: interviewQuestion },
+      { role: 'user', content: musicAnswer },
+    ];
+    setConversationHistory(initialHistory);
+    analytics.intakeStep({ step: 'interview' });
+
+    await new Promise<void>((r) => setTimeout(r, 850));
+    setBotTyping(false);
+    void sendToConverse(initialHistory);
   }
 
   async function handlePayCTA() {
@@ -735,7 +787,7 @@ export default function CreateContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          freeformContext: freeformText.trim(),
+          freeformContext: conversationHistory[0]?.content ?? freeformText.trim(),
           parsedName: parsedName || '',
           preGeneratedLyrics: preGenData.lyrics,
           preGeneratedStyle: preGenData.sunoStyle,
@@ -763,16 +815,12 @@ export default function CreateContent() {
 
   const name = parsedName || '';
   const stepIndex = STEP_ORDER.indexOf(step as (typeof STEP_ORDER)[number]);
-  // clarify is step index 2 of 3 — show at 66%. generating/preview always 100%
   const progress =
     step === 'generating' || step === 'preview' ? 100 : (stepIndex / STEP_ORDER.length) * 100;
   const showBack = stepIndex > 0 && step !== 'generating' && step !== 'preview' && !botTyping;
   const showQuality = step === 'freeform' && freeformText.length > 0;
 
-  const nudgeChips =
-    step === 'freeform' && (textareaFocused || freeformText.length > 0) && qualityScore < 70
-      ? NUDGE_CHIPS
-      : [];
+  const nudgeChips = step === 'freeform' ? NUDGE_CHIPS : [];
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -782,8 +830,9 @@ export default function CreateContent() {
       <div className="border-border shrink-0 border-b px-4 py-3">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <Link
-            href="/"
-            aria-label="Back to home"
+            href="/create"
+            aria-label="Start a new song"
+            onClick={() => localStorage.removeItem(DRAFT_KEY)}
             className="shrink-0 opacity-70 transition-opacity hover:opacity-100"
           >
             <Image src="/brand/logomark.png" alt="songfor.me" width={24} height={24} />
@@ -808,7 +857,9 @@ export default function CreateContent() {
               style={{ width: `${progress}%`, height: '4px' }}
             />
           </div>
-          {showQuality && <QualityRing score={qualityScore} />}
+          {step === 'freeform' && (
+            <QualityRing score={qualityScore} className={showQuality ? '' : 'invisible'} />
+          )}
         </div>
       </div>
 
@@ -894,22 +945,20 @@ export default function CreateContent() {
                 )}
               </div>
 
-              {/* Nudge chips */}
-              {nudgeChips.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {nudgeChips.map((chip) => (
-                    <button
-                      key={chip.label}
-                      type="button"
-                      onPointerDown={(e) => e.preventDefault()}
-                      onClick={() => handleNudgeChip(chip.append)}
-                      className="border-border text-muted hover:border-accent hover:text-text min-h-11 rounded-full border px-3 py-1 text-xs transition-colors"
-                    >
-                      + {chip.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Nudge chips — always visible as blank-page starters */}
+              <div className="flex flex-wrap gap-1.5">
+                {nudgeChips.map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onPointerDown={(e) => e.preventDefault()}
+                    onClick={() => handleNudgeChip(chip.append)}
+                    className="border-border text-muted hover:border-accent hover:text-text min-h-11 rounded-full border px-3 py-1 text-xs transition-colors"
+                  >
+                    + {chip.label}
+                  </button>
+                ))}
+              </div>
 
               <Button onClick={handleFreeformSubmit} className="w-full">
                 Continue →
@@ -917,7 +966,72 @@ export default function CreateContent() {
             </div>
           )}
 
-          {/* Step 3: Clarify — Claude-generated follow-up questions */}
+          {/* Interview — genre/artist selection */}
+          {step === 'interview' && !botTyping && (
+            <div className="space-y-3">
+              <p className="text-muted text-xs">An artist they love</p>
+              {/* Artist input with typewriter placeholder — hero position */}
+              <div className="relative">
+                <Input
+                  value={favoriteArtist}
+                  onChange={(e) => setFavoriteArtist(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (favoriteArtist.trim() || selectedGenre)) {
+                      void handleInterviewSubmit(false);
+                    }
+                  }}
+                  className="text-base"
+                  aria-label="An artist they love"
+                />
+                {/* Artist typewriter overlay — raw div, intentional pointer-events-none */}
+                {!favoriteArtist && artistTypewriterText && (
+                  <div
+                    className="text-muted/50 pointer-events-none absolute inset-0 flex items-center overflow-hidden px-4 text-base"
+                    aria-hidden="true"
+                  >
+                    {artistTypewriterText}
+                    <span
+                      className="ml-0.5 inline-block w-0.5 animate-pulse bg-current"
+                      style={{ height: '1em', verticalAlign: 'middle' }}
+                    />
+                  </div>
+                )}
+              </div>
+              {/* Genre chips — de-emphasized when artist is entered */}
+              <div className={cn('flex flex-wrap gap-1.5', favoriteArtist && 'opacity-40')}>
+                {/* Genre chip — rounded-pill custom shape, raw button per design-system exception */}
+                {genreOptions.map((genre) => (
+                  <button
+                    key={genre}
+                    type="button"
+                    onClick={() => setSelectedGenre(selectedGenre === genre ? '' : genre)}
+                    className={cn(
+                      'border-border text-muted hover:border-accent hover:text-text min-h-11 rounded-full border px-3 py-1 text-xs transition-colors',
+                      selectedGenre === genre && 'border-accent text-text bg-accent/10'
+                    )}
+                  >
+                    {genre}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => void handleInterviewSubmit(true)}
+                  className="border-border text-muted hover:border-accent hover:text-text min-h-11 rounded-full border px-3 py-1 text-xs transition-colors"
+                >
+                  ✨ Surprise me
+                </button>
+              </div>
+              <Button
+                onClick={() => void handleInterviewSubmit(false)}
+                className="w-full"
+                disabled={!favoriteArtist.trim() && !selectedGenre}
+              >
+                Continue →
+              </Button>
+            </div>
+          )}
+
+          {/* Clarify — Claude-generated follow-up questions */}
           {step === 'clarify' && !botTyping && (
             <div className="space-y-3">
               {clarifyQuestions.map((question, i) => (

@@ -24,7 +24,7 @@ export default function Home() {
           </h1>
           <p className="text-muted mx-auto mt-6 max-w-2xl text-lg">
             Tell us about them. We&apos;ll write the lyrics, compose the music, and deliver a
-            one-of-a-kind song in minutes.
+            one-of-a-kind birthday song just for them.
           </p>
           <div className="mt-10">
             <Link

@@ -98,8 +98,6 @@ Previous versions (for reference if encountering legacy content):
 ## Project Structure Additions
 
 - `/content/prompts/` — Claude system prompt templates (lyrics generation, style string generation)
-- `/lib/suno/` — Future API abstraction layer (adapter pattern: provider-agnostic interface so swapping sunoapi.org → official Suno API → any provider is one config change)
-- `/lib/queue/` — Order queue management utilities (status: pending → generating → done → delivered)
 - `/emails/` — React Email templates for Resend (song delivery, order confirmation)
 
 ## Route Map

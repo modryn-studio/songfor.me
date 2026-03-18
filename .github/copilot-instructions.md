@@ -47,8 +47,6 @@ basePath:
 /components             → Reusable UI components
 /lib                    → Utilities, helpers, data fetching
 /content/prompts/       → Claude system prompt templates (lyrics + style string generation)
-/lib/suno/              → Future Suno API abstraction layer (adapter pattern)
-/lib/queue/             → Order queue management utilities
 /emails/                → React Email templates for Resend (song delivery, order confirmation)
 ```
 
